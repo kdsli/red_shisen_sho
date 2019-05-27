@@ -26,13 +26,12 @@ Also, no work was done on installing the program into the Linux environment.
 
 The program can be assembled according to the following algorithm:
 
-$git clone https://github.com/kdsli/red_shisen_sho
-
-mkdir build
-cd build
-cmake ..
-make
-make install
+- git clone https://github.com/kdsli/red_shisen_sho
+- mkdir build
+- cd build
+- cmake ..
+- make
+- make install
 
 The copy obtained in the output_Release directory is fully functional.
 
