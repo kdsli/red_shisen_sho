@@ -44,6 +44,9 @@ void CField::newGame(CSettings::FieldType field_type)
 
     m_tiles.fill(-1);
 
+    // Распределяем костяшки
+    // Возможно, что типов костяшек не хватит заполнить все поле (есть такие поля)
+    // тогда начинаем заполнять с начала оставшиеся поля
     int n = 0, k = 0, type = 0;
     int in_type = m_count_in_type / 2;
     int max_type = m_ts->pixmaps().size();
@@ -57,17 +60,6 @@ void CField::newGame(CSettings::FieldType field_type)
                 type = 0;
         }
     }
-
-    // Распределяем костяшки
-//    int n = 0;
-//    for (int i = 0; i < m_tile_count / m_count_in_type; ++i) {
-//        // Вложенный цикл по количеству костяшек данного типа
-//        for (int j = 0; j < m_count_in_type; ++j) {
-//            // Извлеченное из v случайное число - это индекс, куда поместить костяшку
-//            // И по этим координатам поместим тип
-//            m_tiles[v[n++]] = i;
-//        }
-//    }
 
     if (settings->isDecision()) {
         // Перемешать так, чтобы набор костяшек потенциально можно решить
