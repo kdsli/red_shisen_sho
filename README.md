@@ -43,3 +43,11 @@ From the unfinished I can specify:
 In the near future I plan to fix it.
 
 Respectfully, Dmitry kdsli@kdsli.ru
+
+![screenshot1](screenshots/screenshot1_small.png)
+![screenshot2](screenshots/screenshot2_small.png)
+![screenshot3](screenshots/screenshot3_small.png)
+![screenshot4](screenshots/screenshot4_small.png)
+![screenshot5](screenshots/screenshot5.png)
+![screenshot6](screenshots/screenshot6.png)
+![screenshot7](screenshots/screenshot7.png)
