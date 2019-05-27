@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CMainWindow</class>
+ <widget class="QMainWindow" name="CMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>555</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>red_shisen_sho by kdsli@kdsli.ru</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources/red_shisen_sho.qrc">
+    <normaloff>:/images/shisen.png</normaloff>:/images/shisen.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>555</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Игра</string>
+    </property>
+    <addaction name="acNewGame"/>
+    <addaction name="acRepeat"/>
+    <addaction name="acPause"/>
+    <addaction name="separator"/>
+    <addaction name="acOptions"/>
+    <addaction name="separator"/>
+    <addaction name="acExit"/>
+   </widget>
+   <widget class="QMenu" name="miTraining">
+    <property name="title">
+     <string>Тренировка</string>
+    </property>
+    <addaction name="acUndo"/>
+    <addaction name="acRedo"/>
+    <addaction name="separator"/>
+    <addaction name="acHint"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="miTraining"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="acNewGame"/>
+   <addaction name="acUndo"/>
+   <addaction name="acRedo"/>
+   <addaction name="acHint"/>
+   <addaction name="acPause"/>
+   <addaction name="acOptions"/>
+   <addaction name="acExit"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="acNewGame">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/shisen.png</normaloff>:/images/shisen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Новая игра</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="acExit">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/exit.png</normaloff>:/images/exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Выход</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+X</string>
+   </property>
+  </action>
+  <action name="acHint">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/hint.png</normaloff>:/images/hint.png</iconset>
+   </property>
+   <property name="text">
+    <string>Подсказка</string>
+   </property>
+   <property name="shortcut">
+    <string>H</string>
+   </property>
+  </action>
+  <action name="acOptions">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/options.png</normaloff>:/images/options.png</iconset>
+   </property>
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="acRepeat">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Начать заново</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="acPause">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/pause.png</normaloff>:/images/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Пауза</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="acUndo">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/undo.png</normaloff>:/images/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Отменить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="acRedo">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/redo.png</normaloff>:/images/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Повторить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="../resources/red_shisen_sho.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/exit.png</file>
+        <file>images/hint.png</file>
+        <file>images/redo.png</file>
+        <file>images/undo.png</file>
+        <file>images/options.png</file>
+        <file>images/pause.png</file>
+        <file>images/refresh.png</file>
+        <file>images/shisen.png</file>
+    </qresource>
+</RCC>
