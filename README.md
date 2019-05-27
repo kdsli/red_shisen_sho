@@ -4,8 +4,7 @@ kdsli's version for shishen_sho
 This project was created to teach my son programming and to support my professional skills, as well as due to the 
 presence of a certain amount of free time.
 
-It is written without viewing the source code of the KShisen program from KDE. The project uses only graphic images 
-of this project, including tiles and background image.
+It is written without viewing the source code of the KShisen program from KDE and uses only pure QT and graphic images of this project, including tiles and background image.
 
 The goal of the project was to find the optimal tiles removal algorithms.
 
