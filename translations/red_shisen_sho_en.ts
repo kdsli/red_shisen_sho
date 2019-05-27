@@ -16,7 +16,7 @@
     <message>
         <location line="+490"/>
         <source>Игра приостановлена.</source>
-        <translation>Game suspended.</translation>
+        <translation>Game paused.</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -37,7 +37,7 @@
         <location line="-14"/>
         <location line="+15"/>
         <source>Щелкните для продолжения...</source>
-        <translation>Click to continue...</translation>
+        <translation>Click to resume game...</translation>
     </message>
 </context>
 <context>
