@@ -17,8 +17,8 @@ struct Record
 };
 
 // Список рекордов
-using TypeRecords = QVector<Record>;
-using Records = QMap<CSettings::FieldType, TypeRecords>;
+using RecordList = QVector<Record>;
+using GameRecords = QMap<CSettings::FieldType, RecordList>;
 
 // Класс хранения рекордов программы
 
@@ -29,10 +29,16 @@ public:
     CRecordsManager(QObject *parent = nullptr);
 
     // Вернуть список рекордов для определенного типа игры
-    TypeRecords &getGameRecords(CSettings::FieldType);
+    RecordList &getGameRecords(CSettings::FieldType);
+    // Проверить, попадает ли время в таблицу рекордов и добавить если надо
+    // Возвращает, под каким номером добавлено
+    int checkRecord(CSettings::FieldType, int game_time);
 
 private:
-    Records m_records;
+    GameRecords m_records;
+
+    void loadRecords();
+    void saveRecords();
 };
 
 extern CRecordsManager records_managers;
