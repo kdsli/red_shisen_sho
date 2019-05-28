@@ -18,7 +18,9 @@ In addition, the program has additional features in relation to the original gam
 
 The main language of the program and comments is Russian, but there is an interface translation file in English
 
-The program is not public, but quite workable.
+The program is not public, but quite workable. With this, the source code of the program passes the test successfully:
+
+cppcheck -q --enable=all --inconclusive --std=c++14
 
 The program was not going under Windows, but it will be checked in the near future and there should be no problems. 
 Also, no work was done on installing the program into the Linux environment.

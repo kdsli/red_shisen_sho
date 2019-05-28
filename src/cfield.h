@@ -72,7 +72,7 @@ public:
     Tile getTile(int) const;
 
     // Тип костяшки по координатам и индексу
-    int tileType(Tile) const;
+    int tileType(const Tile &) const;
     int tileType(int x, int y) const;
     int tileType(int index) const;
 
@@ -181,7 +181,7 @@ private:
     // Удалить костяшки
     void clearTiles(TilePair tiles, Field * = nullptr);
     // Сдвинуть колонку вниз
-    void columnMoveDown(Tile, Field *collation);
+    void columnMoveDown(const Tile &, Field *collation);
     // Сдвинуть колонку вверх
     void columnMoveUp(Tile);
 

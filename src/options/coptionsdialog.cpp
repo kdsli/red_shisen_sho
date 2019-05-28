@@ -23,6 +23,9 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
     connect(ui->lwBackgrounds, &QListWidget::currentRowChanged, this, &COptionsDialog::slotBGRowChange);
     connect(ui->lwTiles, &QListWidget::currentRowChanged, this, &COptionsDialog::slotTilesRowChange);
 
+    connect(tiles_manager, &CTilesManager::signalChangeTilesets, this, &COptionsDialog::slotInitTilesTab);
+    connect(bg_manager, &CBackgroundManager::signalChangeBackgrounds, this, &COptionsDialog::slotInitBackgroundTab);
+
     QStringList list;
     list << tr("медленно") << tr("нормально") << tr("быстро");
 
@@ -33,10 +36,10 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
     fillLocales();
 
     // Настроим закладку костяшек
-    initTilesTab();
+    slotInitTilesTab();
 
     // Настроим закладку фона
-    initBackgroundTab();
+    slotInitBackgroundTab();
 }
 
 COptionsDialog::~COptionsDialog()
@@ -64,10 +67,6 @@ void COptionsDialog::Show()
     m_time_delay_slider->setValue(settings->timerDelay());
 
     ui->tabWidget->setCurrentIndex(0);
-
-    // Установим текущий индекс списка фона
-    ui->lwTiles->setCurrentRow(tiles_manager->currentIndex());
-    ui->lwBackgrounds->setCurrentRow(bg_manager->currentIndex());
 
     exec();
 }
@@ -148,23 +147,27 @@ void COptionsDialog::slotBGRowChange(int index)
 }
 
 // Заполним закладку костяшек
-void COptionsDialog::initTilesTab()
+void COptionsDialog::slotInitTilesTab()
 {
+    ui->lwTiles->clear();
     for (auto const &record : tiles_manager->tilesList()) {
         auto text = record.description;
         if (text.isEmpty()) text = record.file_name;
         ui->lwTiles->addItem(text);
     }
+    ui->lwTiles->setCurrentRow(tiles_manager->currentIndex());
 }
 
 // Заполним закладку фона
-void COptionsDialog::initBackgroundTab()
+void COptionsDialog::slotInitBackgroundTab()
 {
+    ui->lwBackgrounds->clear();
     for (auto const &record : bg_manager->bgList()) {
         auto text = record.description;
         if (text.isEmpty()) text = record.file_name;
         ui->lwBackgrounds->addItem(text);
     }
+    ui->lwBackgrounds->setCurrentRow(bg_manager->currentIndex());
 }
 
 void COptionsDialog::fillLocales()

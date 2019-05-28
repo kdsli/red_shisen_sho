@@ -149,7 +149,7 @@ void CField::clearTiles(TilePair tiles, Field *collation)
 
 // ================================================================================================
 // Сдвинуть колонку вниз. Collation нужен для демонстрации в режиме гравитации
-void CField::columnMoveDown(Tile point, Field *collation)
+void CField::columnMoveDown(const Tile &point, Field *collation)
 {
     auto index = getIndex(point);
     forever {
@@ -192,7 +192,7 @@ Tile CField::getTile(int index) const
 
 // ================================================================================================
 // Тип костяшки по координатам
-int CField::tileType(Tile point) const
+int CField::tileType(const Tile &point) const
 {
     return m_tiles[getIndex(point)];
 }
@@ -668,10 +668,10 @@ int CField::farHorz(Tile tile, int direct, int limit)
 
 // ================================================================================================
 // Проверить, насколько далеко можно уйти по вертикали
-int CField::farVert(Tile tiles, int direct, int limit)
+int CField::farVert(Tile tile, int direct, int limit)
 {
-    auto idx = getIndex(tiles);
-    auto y = tiles.y();
+    auto idx = getIndex(tile);
+    auto y = tile.y();
     forever {
         idx += direct * m_x;
         y += direct;

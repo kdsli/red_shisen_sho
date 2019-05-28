@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVector>
 #include <QPixmap>
+#include <QFileSystemWatcher>
 
 struct BackgroundFile {
     QString file_name;
@@ -19,11 +20,11 @@ struct BackgroundFile {
 
 class CBackgroundManager : public QObject
 {
+    Q_OBJECT
 public:
-    CBackgroundManager(QObject *parent = nullptr);
+    explicit CBackgroundManager(QObject *parent = nullptr);
 
     const QVector<BackgroundFile> &bgList() const { return m_files; }
-    const QSize thumbnailsSize();
 
     // Текущий выбранный файл
     QString currentFile();
@@ -31,15 +32,24 @@ public:
     bool isCurrentSvg();
     int currentIndex();
 
+signals:
+    void signalChangeBackgrounds();
+
 private:
     QString m_lib_dir;
     QString m_user_dir;
     // Список файлов
     QVector<BackgroundFile> m_files;
+    QFileSystemWatcher m_lib_watcher;
+    QFileSystemWatcher m_user_watcher;
 
     void initFiles();
     void loadSvg(const QString &dir, const QString &);
     void loadImage(const QString &dir, const QString &);
+
+private slots:
+    void slotDirectoryChanged(const QString &);
+
 };
 
 extern CBackgroundManager *bg_manager;

@@ -15,9 +15,12 @@ static const QSize base_size = QSize(96, 116);
 static const QSize tile_size = QSize(69, 89);
 static const QStringList filters_svg{"*.svg", "*.svgz"};
 
-CTilesManager::CTilesManager(QObject *parent) : QObject(parent)
+CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
+    m_lib_dir(settings->mahjonggLibDir() + tiles_dir + QDir::separator())
 {
-    m_lib_dir = settings->mahjonggLibDir() + tiles_dir + QDir::separator();
+
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &CTilesManager::slotDirectoryChanged);
+    m_watcher.addPath(m_lib_dir);
 
     initFiles();
 }
@@ -100,4 +103,12 @@ void CTilesManager::loadSvg(const QString &file_name)
     // И сохраним как зависимый Pixmap
     file.pixmap = QPixmap::fromImage(img);
     m_files.append(std::move(file));
+}
+
+// Слот обработки изменения директории
+void CTilesManager::slotDirectoryChanged(const QString &)
+{
+    initFiles();
+    // Сказать окну настроек, что изменилась директория
+    emit signalChangeTilesets();
 }

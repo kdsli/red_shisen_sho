@@ -38,7 +38,6 @@ CBoard::CBoard(QWidget *parent) : QWidget(parent),
     connect(this, &CBoard::signalRedo, m_field, &CField::slotRedo);
 
     // Инициализация менеджера фонов
-    tiles_manager = new CTilesManager(this);
     bg_manager = new CBackgroundManager(this);
 
     // Инициализация фонового изображения
@@ -396,7 +395,7 @@ void CBoard::slotRepaint()
 
 // ================================================================================================
 // Поле сказало перерисовать путь
-void CBoard::slotStartConnect(TilePair tiles)
+void CBoard::slotStartConnect(const TilePair &tiles)
 {
     // Сформируем region для перерисовки и перерисуемся
     repaint(setPathRegion(m_field->path()));
