@@ -16,7 +16,7 @@ QT_END_NAMESPACE
 class CTileSet : public QObject
 {
 public:
-    CTileSet(QObject * parent = nullptr);
+    explicit CTileSet(QObject * parent = nullptr);
 
     // Инициализация
     void initTileSet();

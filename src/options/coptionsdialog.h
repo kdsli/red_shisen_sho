@@ -35,13 +35,13 @@ private:
 
     CLabeledSlider *newSlider(const QStringList &, QGroupBox *);
 
-    void initTilesTab();
-    void initBackgroundTab();
 
     void fillLocales();
 
 private slots:
     void slotAccepted();
+    void slotInitTilesTab();
+    void slotInitBackgroundTab();
     void slotBGRowChange(int index);
     void slotTilesRowChange(int index);
 

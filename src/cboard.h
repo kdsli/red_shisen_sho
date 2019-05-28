@@ -21,7 +21,7 @@ class CBoard : public QWidget
 {
     Q_OBJECT
 public:
-    CBoard(QWidget *parent = nullptr);
+    explicit CBoard(QWidget *parent = nullptr);
 
     // Состояние игры
     enum GameState { gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
@@ -132,7 +132,7 @@ private:
 
 private slots:
     void slotRepaint();
-    void slotStartConnect(TilePair);
+    void slotStartConnect(const TilePair &);
     void slotNotVariants();
     void slotVictory();
 };

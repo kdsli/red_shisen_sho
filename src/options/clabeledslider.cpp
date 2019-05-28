@@ -5,9 +5,9 @@
 
 static const int interval = 5;
 
-CLabeledSlider::CLabeledSlider(QWidget *parent, const QStringList &list) : QSlider(parent)
+CLabeledSlider::CLabeledSlider(QWidget *parent, const QStringList &list) : QSlider(parent),
+      m_labels(list)
 {
-    m_labels = list;
 
     setOrientation(Qt::Horizontal);
     setMinimum(0);

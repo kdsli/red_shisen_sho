@@ -12,7 +12,7 @@ using ExitProc = void (CKeeperSettings::*)(QObject *);
 class CWidgetEventFilter : public QObject
 {
 public:
-    CWidgetEventFilter(CKeeperSettings *keeper, ExitProc exit_proc) : QObject(),
+    CWidgetEventFilter(CKeeperSettings *keeper, const ExitProc &exit_proc) : QObject(),
         m_keeper(keeper),
         m_exit_proc(exit_proc) {}
     ~CWidgetEventFilter() override = default;

@@ -18,20 +18,20 @@ static const QStringList filters_svg{"*.svg", "*.svgz"};
 static const QStringList filters_images{"*.jpg", "*.png"};
 
 
-CBackgroundManager::CBackgroundManager(QObject *parent) : QObject(parent)
+CBackgroundManager::CBackgroundManager(QObject *parent) : QObject(parent),
+    m_lib_dir(settings->mahjonggLibDir() + backgrounds_dir + QDir::separator()),
+    m_user_dir(settings->userBGDir())
 {
-    m_lib_dir = settings->mahjonggLibDir() + backgrounds_dir + QDir::separator();
-    m_user_dir = settings->userBGDir();
+
+    connect(&m_lib_watcher, &QFileSystemWatcher::directoryChanged, this, &CBackgroundManager::slotDirectoryChanged);
+    m_lib_watcher.addPath(m_lib_dir);
+    connect(&m_user_watcher, &QFileSystemWatcher::directoryChanged, this, &CBackgroundManager::slotDirectoryChanged);
+    m_lib_watcher.addPath(m_user_dir);
 
     if (!QFileInfo::exists(currentFile()))
         settings->setDefaultBackground();
 
     initFiles();
-}
-
-const QSize CBackgroundManager::thumbnailsSize()
-{
-    return thumbnail_size;
 }
 
 QString CBackgroundManager::currentFile()
@@ -121,3 +121,11 @@ void CBackgroundManager::loadImage(const QString &dir, const QString &file_name)
     file.pixmap = QPixmap::fromImage(img);
     m_files.append(std::move(file));
 }
+
+void CBackgroundManager::slotDirectoryChanged(const QString &)
+{
+    initFiles();
+    // Сказать окну настроек, что изменилась директория
+    emit signalChangeBackgrounds();
+}
+

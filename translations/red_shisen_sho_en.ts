@@ -4,7 +4,7 @@
 <context>
     <name>CBoard</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+61"/>
+        <location filename="../src/cboard.cpp" line="+60"/>
         <source>Ваше время: </source>
         <translation>Time&quot;: </translation>
     </message>
@@ -236,7 +236,7 @@
         <translation>Background</translation>
     </message>
     <message>
-        <location filename="../src/options/coptionsdialog.cpp" line="+27"/>
+        <location filename="../src/options/coptionsdialog.cpp" line="+30"/>
         <source>медленно</source>
         <translation>slow</translation>
     </message>
@@ -254,7 +254,7 @@
 <context>
     <name>CTilesManager</name>
     <message>
-        <location filename="../src/options/ctilesmanager.cpp" line="+60"/>
+        <location filename="../src/options/ctilesmanager.cpp" line="+63"/>
         <source>Отсутствует директория tileset</source>
         <translation>Missing tileset directory</translation>
     </message>
