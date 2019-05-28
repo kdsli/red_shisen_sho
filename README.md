@@ -16,14 +16,14 @@ In addition, the program has additional features in relation to the original gam
   into the high score table. When the training mode is off, these functions are not available, but the results are recorded 
   in the table of records.
 
-The main language of the program and comments is Russian, but there is an interface translation file in English
-
-The program is not public, but quite workable. With this, the source code of the program passes the test successfully:
+The source code of the program is successfully tested:
 
 cppcheck -q --enable=all --inconclusive --std=c++14
 
-The program was not going under Windows, but it will be checked in the near future and there should be no problems. 
-Also, no work was done on installing the program into the Linux environment.
+The main language of the program and comments is Russian, but there is an interface translation file into English.
+
+Build under Windows posted here. But no work was done on installing the program on Linux, since the program was 
+not planned as public. Nevertheless, it is quite workable.
 
 The program can be assembled according to the following algorithm:
 
