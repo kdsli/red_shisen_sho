@@ -33,8 +33,14 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/kmahjongglib DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
+# Чтобы не появлялось окно командной строки при запуске в Windows
+IF(WIN32)
+SET(GUI_TYPE WIN32)
+ENDIF(WIN32)
+
 add_executable(
     ${PROJECT_NAME}
+    ${GUI_TYPE}
     ${SOURCE_FILES}
     ${HEADER_FILES}
     ${UI_FILES}
