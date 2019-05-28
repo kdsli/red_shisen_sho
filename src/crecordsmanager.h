@@ -31,16 +31,20 @@ public:
     // Вернуть список рекордов для определенного типа игры
     RecordList &getGameRecords(CSettings::FieldType);
     // Проверить, попадает ли время в таблицу рекордов и добавить если надо
-    // Возвращает, под каким номером добавлено
+    // Возвращает, под каким номером добавлено или -1
     int checkRecord(CSettings::FieldType, int game_time);
+
+    bool recordsAvailable() const { return m_record_available; }
 
 private:
     GameRecords m_records;
+    QString m_file_name;
+    bool m_record_available;
 
     void loadRecords();
     void saveRecords();
 };
 
-extern CRecordsManager records_managers;
+extern CRecordsManager *records_managers;
 
 #endif // CRECORSDMANAGER_H

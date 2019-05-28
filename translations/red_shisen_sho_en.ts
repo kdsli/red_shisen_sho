@@ -4,7 +4,7 @@
 <context>
     <name>CBoard</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+60"/>
+        <location filename="../src/cboard.cpp" line="+64"/>
         <source>Ваше время: </source>
         <translation>Time&quot;: </translation>
     </message>

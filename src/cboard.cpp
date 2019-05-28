@@ -2,6 +2,7 @@
 
 #include "options/cbackgroundmanager.h"
 #include "options/ctilesmanager.h"
+#include "crecordsmanager.h"
 
 #include <QSvgRenderer>
 #include <QApplication>
@@ -25,6 +26,12 @@ CBoard::CBoard(QWidget *parent) : QWidget(parent),
 {
     m_game_state = gsNormal;
 
+    // Инициализация менеджеров костяшек, фонов, рекордов
+    tiles_manager = new CTilesManager(this);
+    bg_manager = new CBackgroundManager(this);
+    records_managers = new CRecordsManager(this);
+
+    // Набор костяшек и игровое поле
     m_ts = new CTileSet();
     m_field = new CField(m_ts, this);
 
@@ -36,9 +43,6 @@ CBoard::CBoard(QWidget *parent) : QWidget(parent),
 
     connect(this, &CBoard::signalUndo, m_field, &CField::slotUndo);
     connect(this, &CBoard::signalRedo, m_field, &CField::slotRedo);
-
-    // Инициализация менеджера фонов
-    bg_manager = new CBackgroundManager(this);
 
     // Инициализация фонового изображения
     if (!initBackground()) return;

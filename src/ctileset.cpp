@@ -29,8 +29,6 @@
 CTileSet::CTileSet(QObject *parent) : QObject(parent),
     m_renderer(nullptr)
 {
-    tiles_manager = new CTilesManager(this);
-
     initTileSet();
 }
 
