@@ -93,7 +93,7 @@ void CMainWindow::slotSetLanguage()
 
 void CMainWindow::slotRecords()
 {
-    slotShowResults(2);
+    slotShowResults(-1);
 }
 
 // Показать результаты
