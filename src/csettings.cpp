@@ -21,20 +21,21 @@ static const QString training_name = "training";
 static const QString locale_name = "locale";
 
 static const QString kmahjongglib_dir = "kmahjongglib";
-static const QString tilesets_dir = "tilesets";
 
-static const QStringList field_type_names{"14x6", "16x9", "18x8", "24x12", "26x14", "30x16"};
+static const GameTypes game_types{
+    {fz14x6, "14x6"}, {fz16x9, "16x9"}, {fz18x8, "18x8"}, {fz24x12, "24x12"},
+    {fz26x14, "26x14"}, {fz30x16, "30x16"}
+};
 static const QVector<int> time_delay_values{1000, 500, 200};
 
 static const QString default_background = "egyptian.svgz";
-static const QString user_bg_dir_name = "UserBackgroungs";
 
 static const QString translations_dir_name = "translations";
 static const QString translation_file_postfix = "red_shisen_sho_";
 
 CSettings::CSettings() : CKeeperSettings ()
 {
-    m_current_field_type = static_cast<FieldType>(value(current_field_type_name, fz18x8).toInt());
+    m_current_game_type = static_cast<GameType>(value(current_field_type_name, fz18x8).toInt());
     m_timer_delay = value(timer_delay_name, 1).toInt();
     m_background = value(background_name, "egyptian.svgz").toString();
     m_tileset = value(tileset_name, "default.svgz").toString();
@@ -48,10 +49,10 @@ CSettings::CSettings() : CKeeperSettings ()
     if (!m_languages.contains(m_locale))
         m_locale = QLocale::system().bcp47Name();
 
-    // Проверим существование пользовательской директории и создадим ее если надо
-    m_user_bg_dir = qApp->applicationDirPath() + QDir::separator() + user_bg_dir_name + QDir::separator();
-    QDir dir(m_user_bg_dir);
-    if (!dir.exists()) dir.mkdir(m_user_bg_dir);
+    // Создадим список названий игр, чтобы не создавать его каждый раз
+    for (const auto &name : game_types) {
+        m_game_names.append(name.second);
+    }
 }
 
 const QString CSettings::translationsDirName()
@@ -111,9 +112,9 @@ void CSettings::setCurrentLanguage(const QString &language)
     setValue(locale_name, it.key());
 }
 
-void CSettings::setFieldType(FieldType field_type)
+void CSettings::setCurrentGameType(GameType field_type)
 {
-    m_current_field_type = field_type;
+    m_current_game_type = field_type;
     setValue(current_field_type_name, field_type);
 }
 
@@ -129,15 +130,28 @@ int CSettings::timeDelay() const
     return time_delay_values[m_timer_delay];
 }
 
-const QStringList &CSettings::fieldTypeNames()
+const GameTypes &CSettings::games()
 {
-    return field_type_names;
+    return game_types;
 }
 
 // Путь к директории изображений mahjongg
 const QString CSettings::mahjonggLibDir() const
 {
     return qApp->applicationDirPath() + QDir::separator() + kmahjongglib_dir + QDir::separator();
+}
+
+// Индекс текущей игры в массиве GameTypes
+int CSettings::currentGameIndex() const
+{
+    auto it = std::find_if(game_types.cbegin(), game_types.cend(), [this](const auto &game){
+        return game.first == m_current_game_type;
+    });
+
+    // Paranoia
+    auto dist = it == game_types.cend() ? -1 : std::distance(game_types.cbegin(), it);
+
+    return static_cast<int>(dist);
 }
 
 void CSettings::setBackground(const QString &background)
@@ -151,7 +165,7 @@ void CSettings::setDefaultBackground()
     m_background = default_background;
 }
 
-void CSettings::setTileset(const QString &tileset)
+void CSettings::setCurrentTileset(const QString &tileset)
 {
     m_tileset = tileset;
     setValue(tileset_name, tileset);
@@ -174,4 +188,12 @@ void CSettings::setTraining(bool training)
 {
     m_training = training;
     setValue(training_name, training);
+}
+
+QString CSettings::userName()
+{
+    auto name = qgetenv("USER");
+    if (name.isEmpty())
+        name = qgetenv("USERNAME");
+    return name;
 }

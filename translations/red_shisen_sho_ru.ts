@@ -14,7 +14,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+490"/>
+        <location line="+496"/>
         <source>Игра приостановлена.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -44,11 +44,6 @@
     <name>CMainWindow</name>
     <message>
         <location filename="../src/cmainwindow.ui"/>
-        <source>red_shisen_sho by kdsli@kdsli.ru</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location/>
         <source>Игра</source>
         <translation type="unfinished"></translation>
     </message>
@@ -138,7 +133,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+86"/>
+        <location filename="../src/cmainwindow.cpp" line="+90"/>
         <source>Внимание!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -147,11 +142,26 @@
         <source>Изменился язык. Изменение вступят в силу после перезапуска программы.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/cmainwindow.ui"/>
+        <source>red_shisen_sho</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location/>
+        <source>Рекорды</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location/>
+        <source>Alt+R</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>COptionsDialog</name>
     <message>
-        <location filename="../src/options/coptionsdialog.ui"/>
+        <location filename="../src/coptionsdialog.ui"/>
         <source>Настройки...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -236,7 +246,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/options/coptionsdialog.cpp" line="+30"/>
+        <location filename="../src/coptionsdialog.cpp" line="+30"/>
         <source>медленно</source>
         <translation type="unfinished"></translation>
     </message>
@@ -252,9 +262,47 @@
     </message>
 </context>
 <context>
+    <name>CRecordsDialog</name>
+    <message>
+        <location filename="../src/crecordsdialog.ui"/>
+        <source>Таблица рекордов</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/crecordsdialog.cpp" line="+76"/>
+        <source>Дата</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Время</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Гравитация</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Имя</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>да</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>нет</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CTilesManager</name>
     <message>
-        <location filename="../src/options/ctilesmanager.cpp" line="+63"/>
+        <location filename="../src/ctilesmanager.cpp" line="+63"/>
         <source>Отсутствует директория tileset</source>
         <translation type="unfinished"></translation>
     </message>

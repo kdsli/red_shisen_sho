@@ -14,11 +14,13 @@ struct Record
     QString name;
     int time;         // Количество секунд
     bool is_gravity;
+
+    Record() : date(QDate::currentDate()) {}
 };
 
 // Список рекордов
 using RecordList = QVector<Record>;
-using GameRecords = QMap<CSettings::FieldType, RecordList>;
+using GameRecords = QMap<GameType, RecordList>;
 
 // Класс хранения рекордов программы
 
@@ -29,12 +31,15 @@ public:
     CRecordsManager(QObject *parent = nullptr);
 
     // Вернуть список рекордов для определенного типа игры
-    RecordList &getGameRecords(CSettings::FieldType);
+    RecordList &gameRecords(GameType);
     // Проверить, попадает ли время в таблицу рекордов и добавить если надо
     // Возвращает, под каким номером добавлено или -1
-    int checkRecord(CSettings::FieldType, int game_time);
+    int checkRecord(int game_time);
 
     bool recordsAvailable() const { return m_record_available; }
+
+    // Количество записей за каждый тип игры
+    int maxRecord() const;
 
 private:
     GameRecords m_records;
@@ -43,8 +48,10 @@ private:
 
     void loadRecords();
     void saveRecords();
+
+    void CreateTestRecord(GameType game, const QString &name, int time, bool is_gravity);
 };
 
-extern CRecordsManager *records_managers;
+extern CRecordsManager *records_manager;
 
 #endif // CRECORSDMANAGER_H

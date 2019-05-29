@@ -24,7 +24,7 @@ public:
     explicit CBoard(QWidget *parent = nullptr);
 
     // Состояние игры
-    enum GameState { gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
+    enum GameState { gsEmpty, gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
 
     QString gameInfo();
 
@@ -43,6 +43,7 @@ signals:
     void signalUndo();
     void signalRedo();
     void signalBackgroundNotFound();
+    void signalShowResult(int);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -129,6 +130,9 @@ private:
 
     // Шаманство с координатами линий, чтобы не сильно уходили за границу поля
     void correctPoint(QPointF &point) const;
+
+    // Проверим результаты
+    void checkResult();
 
 private slots:
     void slotRepaint();

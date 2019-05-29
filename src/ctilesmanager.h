@@ -12,7 +12,7 @@ struct TilesFile {
     QString description;
 };
 
-// Класс управления предпросмотром наборов костяшек
+// Класс управления наборами файлов костяшек
 
 class CTilesManager : public QObject
 {

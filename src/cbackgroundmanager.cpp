@@ -16,12 +16,17 @@ static const QString backgrounds_dir = "backgrounds";
 static const QSize thumbnail_size = QSize(165, 124); // 4:3
 static const QStringList filters_svg{"*.svg", "*.svgz"};
 static const QStringList filters_images{"*.jpg", "*.png"};
-
+static const QString user_dir_name = "UserBackgroungs";
 
 CBackgroundManager::CBackgroundManager(QObject *parent) : QObject(parent),
-    m_lib_dir(settings->mahjonggLibDir() + backgrounds_dir + QDir::separator()),
-    m_user_dir(settings->userBGDir())
+    m_lib_dir(settings->mahjonggLibDir() + backgrounds_dir + QDir::separator())
 {
+
+    // Проверим существование пользовательской директории и создадим ее если надо
+    m_user_dir = qApp->applicationDirPath() + QDir::separator() + user_dir_name + QDir::separator();
+    QDir dir(m_user_dir);
+    if (!dir.exists()) dir.mkdir(m_user_dir);
+
 
     connect(&m_lib_watcher, &QFileSystemWatcher::directoryChanged, this, &CBackgroundManager::slotDirectoryChanged);
     m_lib_watcher.addPath(m_lib_dir);

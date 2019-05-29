@@ -27,12 +27,12 @@ CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
 
 QString CTilesManager::currentFile()
 {
-    return m_lib_dir + settings->tilesetName();
+    return m_lib_dir + settings->currentTilesetName();
 }
 
 int CTilesManager::currentIndex()
 {
-    auto file_name = settings->tilesetName();
+    auto file_name = settings->currentTilesetName();
     auto it = std::find_if(m_files.cbegin(), m_files.cend(), [&file_name](const auto record){
         return record.file_name.compare(file_name, FILE_NAME_SENSITIVITY) == 0;
     });
@@ -49,7 +49,7 @@ int CTilesManager::currentIndex()
 // Потом надо будет как-нибудь поправить SVG
 bool CTilesManager::isCorrectSVG()
 {
-    auto file_name = settings->tilesetName();
+    auto file_name = settings->currentTilesetName();
     return file_name.compare("alphabet.svgz") != 0
             && file_name.compare("egypt.svgz") != 0;
 }

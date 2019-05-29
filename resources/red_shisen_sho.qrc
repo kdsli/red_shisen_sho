@@ -8,5 +8,6 @@
         <file>images/pause.png</file>
         <file>images/refresh.png</file>
         <file>images/shisen.png</file>
+        <file>images/records.png</file>
     </qresource>
 </RCC>

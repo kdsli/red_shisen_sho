@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>red_shisen_sho by kdsli@kdsli.ru</string>
+   <string>red_shisen_sho</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/red_shisen_sho.qrc">
@@ -34,6 +34,8 @@
     <addaction name="acNewGame"/>
     <addaction name="acRepeat"/>
     <addaction name="acPause"/>
+    <addaction name="separator"/>
+    <addaction name="acRecords"/>
     <addaction name="separator"/>
     <addaction name="acOptions"/>
     <addaction name="separator"/>
@@ -164,6 +166,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="acRecords">
+   <property name="icon">
+    <iconset resource="../resources/red_shisen_sho.qrc">
+     <normaloff>:/images/records.png</normaloff>:/images/records.png</iconset>
+   </property>
+   <property name="text">
+    <string>Рекорды</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
    </property>
   </action>
  </widget>

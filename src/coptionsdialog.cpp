@@ -29,7 +29,7 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
     QStringList list;
     list << tr("медленно") << tr("нормально") << tr("быстро");
 
-    m_game_type_slider = newSlider(settings->fieldTypeNames(), ui->gbField);
+    m_game_type_slider = newSlider(settings->gamesName(), ui->gbField);
     m_time_delay_slider = newSlider(list, ui->gbDelay);
 
     // Заполним список языков
@@ -63,8 +63,8 @@ void COptionsDialog::Show()
     ui->ckGravity->setCheckState(settings->isGravity() ? Qt::Checked : Qt::Unchecked);
     ui->ckDecision->setCheckState(settings->isDecision() ? Qt::Checked : Qt::Unchecked);
     ui->ckTraining->setCheckState(settings->isTraining() ? Qt::Checked : Qt::Unchecked);
-    m_game_type_slider->setValue(settings->fieldType());
-    m_time_delay_slider->setValue(settings->timerDelay());
+    m_game_type_slider->setValue(settings->currentGameType());
+    m_time_delay_slider->setValue(settings->timerDelayNumber());
 
     ui->tabWidget->setCurrentIndex(0);
 
@@ -85,12 +85,12 @@ void COptionsDialog::slotAccepted()
         settings->setDecision(state);
         is_new_game = true;
     }
-    if (m_game_type_slider->value() != settings->fieldType()) {
-        settings->setFieldType(static_cast<CSettings::FieldType>(m_game_type_slider->value()));
+    if (m_game_type_slider->value() != settings->currentGameType()) {
+        settings->setCurrentGameType(static_cast<GameType>(m_game_type_slider->value()));
         is_new_game = true;
     }
 
-    if (m_time_delay_slider->value() != settings->timerDelay()) {
+    if (m_time_delay_slider->value() != settings->timerDelayNumber()) {
         settings->setTimerDelay(m_time_delay_slider->value());
     }
 
@@ -107,7 +107,7 @@ void COptionsDialog::slotAccepted()
     }
 
     if (ui->lwTiles->currentRow() != tiles_manager->currentIndex()) {
-        settings->setTileset(tiles_manager->tilesList()[ui->lwTiles->currentRow()].file_name);
+        settings->setCurrentTileset(tiles_manager->tilesList()[ui->lwTiles->currentRow()].file_name);
         is_new_game = true;
         emit signalTilesChange();
     }

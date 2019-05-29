@@ -7,7 +7,7 @@
 #include <QFileInfo>
 #include <QDataStream>
 
-CRecordsManager *records_managers = nullptr;
+CRecordsManager *records_manager = nullptr;
 
 // Максимальное количество хранимых рекордов
 static const int max_record = 10;
@@ -23,6 +23,11 @@ CRecordsManager::CRecordsManager(QObject *parent) : QObject(parent)
         m_file_name = qApp->applicationDirPath();
     }
 
+    // Если директории нет - создадим ее
+    QDir dir(m_file_name);
+    if (!dir.exists())
+        dir.mkpath(m_file_name);
+
     // Имя файла
     m_file_name += QDir::separator() + qApp->applicationName() + ".records";
 
@@ -32,24 +37,47 @@ CRecordsManager::CRecordsManager(QObject *parent) : QObject(parent)
     m_record_available = fi.exists() && fi.isWritable() && fi.isReadable();
 
     loadRecords();
+
+    // Test
+    /*
+    m_records.clear();
+
+    CreateTestRecord(fz14x6, "kdsli", 100, 1);
+    CreateTestRecord(fz14x6, "kdsli", 150, 1);
+    CreateTestRecord(fz14x6, "kdsli", 200, 1);
+    CreateTestRecord(fz14x6, "kdsli", 250, 1);
+    CreateTestRecord(fz16x9, "kdsli", 100, 0);
+    CreateTestRecord(fz16x9, "kdsli", 200, 0);
+    CreateTestRecord(fz18x8, "kdsli", 100, 1);
+    CreateTestRecord(fz18x8, "kdsli", 150, 0);
+    CreateTestRecord(fz18x8, "kdsli", 300, 1);
+    CreateTestRecord(fz18x8, "kdsli", 400, 0);
+
+    saveRecords();
+    */
+
 }
 
 // Вернуть список рекордов для определенного типа игры
-RecordList &CRecordsManager::getGameRecords(CSettings::FieldType type)
+RecordList &CRecordsManager::gameRecords(GameType type)
 {
     return m_records[type];
 }
 
 // Проверить, попадает ли время в таблицу рекордов и добавить если надо
 // Возвращает, под каким номером добавлено или -1
-int CRecordsManager::checkRecord(CSettings::FieldType type, int game_time)
+int CRecordsManager::checkRecord(int game_time)
 {
-    auto &list = m_records[type];
+    auto &list = m_records[settings->currentGameType()];
     Record record;
+    record.time = game_time;
+    record.is_gravity = settings->isGravity();
+    record.name = settings->userName();
 
     // Для пустого списка
     if (list.isEmpty()) {
         list.append(record);
+        saveRecords();
         return 0;
     }
 
@@ -57,17 +85,21 @@ int CRecordsManager::checkRecord(CSettings::FieldType type, int game_time)
     if (list.back().time > game_time) {
         // Надо вставлять в середину. Найдем куда вставлять
         auto it = std::find_if(list.begin(), list.end(), [game_time](auto const &record){
-            return record.time < game_time;
+            return record.time > game_time;
         });
+        int dist = static_cast<int>(std::distance(list.begin(), it));
         // Просто вставим в it
         list.insert(it, record);
         // Если размер превысил max_record - просто удалим последний
         if (list.size() == max_record) list.pop_back();
+        saveRecords();
+        return dist;
     } else {
         // Время за последним, но если количество меньше максимального -
         // просто добавим в конец
         if (list.size() < max_record) {
             list.append(record);
+            saveRecords();
             return list.size() - 1;
         }
     }
@@ -75,7 +107,12 @@ int CRecordsManager::checkRecord(CSettings::FieldType type, int game_time)
     return -1;
 }
 
-// Прочитаь из файла
+int CRecordsManager::maxRecord() const
+{
+    return max_record;
+}
+
+// Прочитать из файла
 void CRecordsManager::loadRecords()
 {
     QFile file(m_file_name);
@@ -87,22 +124,33 @@ void CRecordsManager::loadRecords()
     QDataStream ds(&file);
     ds.setVersion(QDataStream::Qt_5_0);
 
+    // Читаем весь файл в буфер
+    QByteArray ba;
+    ds >> ba;
+
+    // Super decode!
+    QByteArray dst = QByteArray::fromBase64(ba);
+
+    // А дальше разбираем уже поток из массива
+    QDataStream buffer(&dst, QIODevice::ReadOnly);
+    buffer.setVersion(QDataStream::Qt_5_0);
+
     // Читаем количество игр
     int game_count;
-    ds >> game_count;
+    buffer >> game_count;
 
     // И каждую игру
     for (int i = 0; i < game_count; ++i) {
         int game_key;
         int record_count;
-        ds >> game_key >> record_count;
+        buffer >> game_key >> record_count;
         RecordList list;
-        m_records.insert(static_cast<CSettings::FieldType>(game_key), list);
         for (int j = 0; j < record_count; ++j) {
             Record record;
-            ds >> record.date >> record.name >> record.time >> record.is_gravity;
+            buffer >> record.date >> record.name >> record.time >> record.is_gravity;
             list.append(record);
         }
+        m_records.insert(static_cast<GameType>(game_key), list);
     }
 }
 
@@ -118,17 +166,34 @@ void CRecordsManager::saveRecords()
     QDataStream ds(&file);
     ds.setVersion(QDataStream::Qt_5_0);
 
+    // Запишем в QByteArray
+    QByteArray ba;
+    QDataStream buffer(&ba, QIODevice::WriteOnly);
+    buffer.setVersion(QDataStream::Qt_5_0);
+
     // Общее количество игр
-    ds << m_records.size();
+    buffer << m_records.size();
     for (auto it = m_records.keyValueBegin(); it != m_records.keyValueEnd(); ++it) {
         auto key = (*it).first;
         auto &list = (*it).second;
         // За каждую игру записать индекс игры и количество записей
-        ds << key << list.size();
+        buffer << key << list.size();
         // И дальше все записи
         for (const auto &record : list) {
-            ds << record.date << record.name << record.time << record.is_gravity;
+            buffer << record.date << record.name << record.time << record.is_gravity;
         }
     }
+
+    // А буфер в файл - super encoding!
+    ds << ba.toBase64();
+}
+
+void CRecordsManager::CreateTestRecord(GameType game, const QString &name, int time, bool is_gravity)
+{
+    Record record;
+    record.name = name;
+    record.time = time;
+    record.is_gravity = is_gravity;
+    m_records[game].append(record);
 
 }

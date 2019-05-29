@@ -8,24 +8,28 @@ CField::CField(CTileSet *ts, QObject *parent) : QObject(parent),
     m_ts(ts)
 {
     // Заполним массив типов полей
-    m_field_types.insert(CSettings::fz14x6, {14, 6, 4});
-    m_field_types.insert(CSettings::fz16x9, {16, 9, 4});
-    m_field_types.insert(CSettings::fz18x8, {18, 8, 4});
-    m_field_types.insert(CSettings::fz24x12, {24, 12, 8});
-    m_field_types.insert(CSettings::fz26x14, {26, 14, 8});
-    m_field_types.insert(CSettings::fz30x16, {30, 16, 12});
+    m_field_types.insert(fz14x6, {14, 6, 4});
+    m_field_types.insert(fz16x9, {16, 9, 4});
+    m_field_types.insert(fz18x8, {18, 8, 4});
+    m_field_types.insert(fz24x12, {24, 12, 8});
+    m_field_types.insert(fz26x14, {26, 14, 8});
+    m_field_types.insert(fz30x16, {30, 16, 12});
 
     // Максимальное количество выделенных элементов
     m_selected.reserve(12);
     m_path.reserve(3);
 
-    newGame(settings->fieldType());
+    newGame(settings->currentGameType());
 }
 
 // ================================================================================================
 // Новое поле (новая игра)
-void CField::newGame(CSettings::FieldType field_type)
+void CField::newGame(GameType field_type)
 {
+    m_selected.clear();
+    m_path.clear();
+    m_repaint_list.clear();
+
     // Данные поля
     m_x = m_field_types[field_type].x;
     m_y = m_field_types[field_type].y;

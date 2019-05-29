@@ -4,7 +4,8 @@
 #include "cboard.h"
 
 #include <QMainWindow>
-#include "options/coptionsdialog.h"
+#include "coptionsdialog.h"
+#include "crecordsdialog.h"
 
 namespace Ui {
 class CMainWindow;
@@ -22,6 +23,7 @@ private:
     Ui::CMainWindow *ui;
     CBoard *m_board;
     COptionsDialog *m_options_dialog;
+    CRecordsDialog *m_record_dialog;
 
 private slots:
     void slotOptions();
@@ -29,7 +31,8 @@ private slots:
     void slotUndoRedo(bool, bool);
     void slotTrainingChange();
     void slotSetLanguage();
-
+    void slotRecords();
+    void slotShowResults(int);
 };
 
 #endif // CMAINWINDOW_H

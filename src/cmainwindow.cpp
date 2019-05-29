@@ -2,15 +2,16 @@
 #include "ui_cmainwindow.h"
 
 #include "csettings.h"
+
 #include <QMessageBox>
 #include <QPushButton>
 #include <QKeyEvent>
 
-CMainWindow::CMainWindow(QWidget *parent) :
-    QMainWindow(parent),
+CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     ui(new Ui::CMainWindow),
     m_board(new CBoard(this)),
-    m_options_dialog(nullptr)
+    m_options_dialog(nullptr),
+    m_record_dialog(nullptr)
 {
     ui->setupUi(this);
 
@@ -24,17 +25,20 @@ CMainWindow::CMainWindow(QWidget *parent) :
     connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHelp);
     connect(ui->acPause, &QAction::triggered, m_board, &CBoard::slotPause);
     connect(ui->acOptions, &QAction::triggered, this, &CMainWindow::slotOptions);
+    connect(ui->acRecords, &QAction::triggered, this, &CMainWindow::slotRecords);
 
     connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::signalUndo);
     connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::signalRedo);
 
     connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
     connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
+    connect(m_board, &CBoard::signalShowResult, this, &CMainWindow::slotShowResults);
 
     ui->acUndo->setEnabled(false);
     ui->acRedo->setEnabled(false);
 
     slotTrainingChange();
+
 }
 
 CMainWindow::~CMainWindow()
@@ -86,3 +90,16 @@ void CMainWindow::slotSetLanguage()
     QMessageBox::information(this, tr("Внимание!"),
                              tr("Изменился язык. Изменение вступят в силу после перезапуска программы."));
 }
+
+void CMainWindow::slotRecords()
+{
+    slotShowResults(2);
+}
+
+// Показать результаты
+void CMainWindow::slotShowResults(int index)
+{
+    if (!m_record_dialog) m_record_dialog = new CRecordsDialog(this);
+    m_record_dialog->Show(index);
+}
+

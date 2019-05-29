@@ -1,7 +1,7 @@
 #include "cboard.h"
 
-#include "options/cbackgroundmanager.h"
-#include "options/ctilesmanager.h"
+#include "cbackgroundmanager.h"
+#include "ctilesmanager.h"
 #include "crecordsmanager.h"
 
 #include <QSvgRenderer>
@@ -29,7 +29,7 @@ CBoard::CBoard(QWidget *parent) : QWidget(parent),
     // Инициализация менеджеров костяшек, фонов, рекордов
     tiles_manager = new CTilesManager(this);
     bg_manager = new CBackgroundManager(this);
-    records_managers = new CRecordsManager(this);
+    records_manager = new CRecordsManager(this);
 
     // Набор костяшек и игровое поле
     m_ts = new CTileSet();
@@ -125,7 +125,7 @@ void CBoard::doNewGame()
     if (m_game_state == gsDemostration)
         closeDemonstration();
 
-    m_field->newGame(settings->fieldType());
+    m_field->newGame(settings->currentGameType());
 
     m_second = 0;
     m_game_state = gsNormal;
@@ -285,6 +285,9 @@ void CBoard::paintEvent(QPaintEvent *event)
     case gsDemostration:
         paintTiles(painter, event);
         paintPath(painter);
+        break;
+    case gsEmpty:
+        break;
     }
 }
 
@@ -430,20 +433,13 @@ void CBoard::slotVictory()
 void CBoard::mousePressEvent(QMouseEvent *event)
 {
     // Пока удаляются костяшки игнорируем мышь
-    if (m_is_path) return;
+    if (m_is_path) {
+        event->accept();
+        return;
+    }
 
     if (event->buttons().testFlag(Qt::LeftButton)) {
-        // Если идет демонстрация
-        if (m_game_state == gsDemostration) {
-            closeDemonstration();
-            event->accept();
-            return;
-        }
-        if (m_game_state == gsNotVariants) {
-            startDemonstration();
-        } else {
-            clickLeftButton(event);
-        }
+        clickLeftButton(event);
     }
     if (event->buttons().testFlag(Qt::RightButton) && settings->isTraining()) {
         clickRightButton(event);
@@ -487,15 +483,25 @@ QRectF CBoard::getBaseRect(Tile tile) const
 // Нажата левая кнопка мыши
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
-    if (m_game_state == gsNormal) {
-        // Получим номер костяшки, которую нажали
-        const auto point = getTileIndex(event->pos());
-        // Отдаем нажатие полю
-        m_field->mouseLeft(point);
-    }
-    if (m_game_state == gsPause) {
+    switch (m_game_state) {
+    case gsNormal:
+        m_field->mouseLeft(getTileIndex(event->pos()));
+        break;
+    case gsPause:
         m_game_state = gsNormal;
         update();
+        break;
+    case gsDemostration:
+        closeDemonstration();
+        break;
+    case gsNotVariants:
+        startDemonstration();
+        break;
+    case gsVictory:
+        checkResult();
+        break;
+    case gsEmpty:
+        break;
     }
 }
 
@@ -683,5 +689,18 @@ void CBoard::doTimerDemostration()
     repaint(region);
 
     ++m_demostration_index;
+}
+
+// ================================================================================================
+// Проверим результаты
+void CBoard::checkResult()
+{
+    m_game_state = gsEmpty;
+    update();
+
+    auto result = records_manager->checkRecord(m_second);
+
+    if (result != -1)
+        emit signalShowResult(result);
 }
 

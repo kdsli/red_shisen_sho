@@ -45,7 +45,7 @@ public:
     CField(CTileSet *ts, QObject *parent = nullptr);
 
     // Инициализация поля
-    void newGame(CSettings::FieldType field_type);
+    void newGame(GameType field_type);
     // Очистить поле
     void clearGame();
 
@@ -116,7 +116,7 @@ private:
     CTileSet *m_ts;
     Field m_tiles;
     // Форматы полей
-    QHash<CSettings::FieldType, FieldRec> m_field_types;
+    QHash<GameType, FieldRec> m_field_types;
     // Размеры поля
     int m_x, m_y;
     // Общее число костяшек

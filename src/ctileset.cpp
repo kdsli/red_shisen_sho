@@ -1,7 +1,7 @@
 #include "ctileset.h"
 
 #include "csettings.h"
-#include "options/ctilesmanager.h"
+#include "ctilesmanager.h"
 
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
