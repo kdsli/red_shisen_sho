@@ -39,7 +39,6 @@ The copy obtained in the output_Release directory is fully functional.
 
 From the unfinished I can specify:
 
-- the table of recorders is disabled
 - no sounds are output
 
 In the near future I plan to fix it.
