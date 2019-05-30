@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 # Исходные файлы
 file(GLOB_RECURSE SOURCE_FILES "${SOURCE_DIR}/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "${SOURCE_DIR}/*.h")
+list(REMOVE_ITEM HEADER_FILES src/version.h)
 file(GLOB_RECURSE UI_FILES "${SOURCE_DIR}/*.ui")
 
 # Формы
