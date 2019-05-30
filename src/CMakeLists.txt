@@ -47,6 +47,7 @@ add_executable(
     ${RESOURCES}
     ${QM_FILES}
     ${OUTPUT_FILE}
-    )
+)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg)
+
