@@ -133,7 +133,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+90"/>
+        <location filename="../src/cmainwindow.cpp" line="+93"/>
         <source>Внимание!</source>
         <translation>Attention!</translation>
     </message>
@@ -141,6 +141,26 @@
         <location line="+1"/>
         <source>Изменился язык. Изменение вступят в силу после перезапуска программы.</source>
         <translation>Changed language. The change will take effect after the program is restarted.</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>О программе</source>
+        <translation>About</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Автор: Дмитрий</source>
+        <translation>Author: Dmitry</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Версия: </source>
+        <translation>Version: </translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Дата сборки: </source>
+        <translation>Build date: </translation>
     </message>
     <message>
         <location filename="../src/cmainwindow.ui"/>
@@ -156,6 +176,16 @@
         <location/>
         <source>Alt+R</source>
         <translation></translation>
+    </message>
+    <message>
+        <location/>
+        <source>Помощь</source>
+        <translation>Help</translation>
+    </message>
+    <message>
+        <location/>
+        <source>О программе...</source>
+        <translation>About...</translation>
     </message>
 </context>
 <context>

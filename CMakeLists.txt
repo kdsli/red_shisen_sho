@@ -28,14 +28,14 @@ include(cmake/get_version.cmake)
 getVersion(PROG_VERSION PROG_DATE)
 message("Version = ${PROG_VERSION} ${PROG_DATE}")
 
-file(READ ${VERSION_FILE} str)
-string(REGEX MATCH "[0-9]*.[0-9]*.[0-9]*-[0-9]*" file_version ${str})
-if(${FILE_VERSION} NOT EQUAL ${PROG_VERSION})
-    file(WRITE ${VERSION_FILE}
-        "// Do not delete this file, created automatically.\n"
-        "static const QString = \"${PROG_VERSION} ${PROG_DATE}\";"
-        )
-    message("Created new version file.")
+if(EXISTS ${VERSION_FILE})
+    file(READ ${VERSION_FILE} str)
+#    string(REGEX MATCH "[0-9]*" FILE_VERSION ${str})
+    if(NOT ${FILE_VERSION} STREQUAL ${PROG_VERSION})
+        write_version_file(${VERSION_FILE})
+    endif()
+else()
+    write_version_file(${VERSION_FILE})
 endif()
 
 add_subdirectory(translations)

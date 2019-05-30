@@ -133,13 +133,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+90"/>
+        <location filename="../src/cmainwindow.cpp" line="+93"/>
         <source>Внимание!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Изменился язык. Изменение вступят в силу после перезапуска программы.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>О программе</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Автор: Дмитрий</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Версия: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Дата сборки: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -155,6 +175,16 @@
     <message>
         <location/>
         <source>Alt+R</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location/>
+        <source>Помощь</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location/>
+        <source>О программе...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

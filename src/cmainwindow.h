@@ -33,6 +33,7 @@ private slots:
     void slotSetLanguage();
     void slotRecords();
     void slotShowResults(int);
+    void slotAbout();
 };
 
 #endif // CMAINWINDOW_H

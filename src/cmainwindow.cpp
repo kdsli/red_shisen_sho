@@ -2,6 +2,7 @@
 #include "ui_cmainwindow.h"
 
 #include "csettings.h"
+#include "version.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -29,6 +30,8 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 
     connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::signalUndo);
     connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::signalRedo);
+
+    connect(ui->acAbout, &QAction::triggered, this, &CMainWindow::slotAbout);
 
     connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
     connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
@@ -101,5 +104,23 @@ void CMainWindow::slotShowResults(int index)
 {
     if (!m_record_dialog) m_record_dialog = new CRecordsDialog(this);
     m_record_dialog->Show(index);
+}
+
+void CMainWindow::slotAbout()
+{
+    QString version, date;
+
+    QRegExp re(R"==(([0-9]+\.[0-9]+\.[0-9]+-[0-9]+)\s+(.+))==");
+    if (re.indexIn(program_version) == 0) {
+        version = re.cap(1);
+        date = re.cap(2);
+    } else {
+        version = "0.0.0-0";
+        date = "0000-00-00 00:00:00 +0000";
+    }
+
+    QMessageBox::about(this, tr("О программе"), tr("Автор: Дмитрий") + " kdsli@kdsl.ru\n\n"
+                       + tr("Версия: ") + version + "\n"
+                       + tr("Дата сборки: ") + date);
 }
 
