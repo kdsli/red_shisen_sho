@@ -24,12 +24,14 @@ private:
     Ui::CRecordsDialog *ui;
     QTabBar *m_tabbar;
     QTableWidget *m_table_widget;
+    int m_result_index;
+    int m_current_game_index;
 
     QHBoxLayout *hlayout;
 
     void fillTabWidget();
-    void filltableWidget(int game_index, int result_index = -1);
-    void addTableItem(int row, int column, const QString &text, int result_index = -1);
+    void filltableWidget();
+    void addTableItem(int row, int column, const QString &text);
 
 private slots:
     void slotTabChanged(int index);

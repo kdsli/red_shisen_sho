@@ -12,7 +12,8 @@
 CRecordsDialog::CRecordsDialog(QWidget *parent) : QDialog(parent),
     ui(new Ui::CRecordsDialog),
     m_tabbar(new QTabBar(this)),
-    m_table_widget(new QTableWidget(this))
+    m_table_widget(new QTableWidget(this)),
+    m_result_index(-1)
 {
     ui->setupUi(this);
 
@@ -48,10 +49,11 @@ CRecordsDialog::~CRecordsDialog()
 
 void CRecordsDialog::Show(int result_index)
 {
-    auto current_game_index = settings->currentGameIndex();
+    m_result_index = result_index;
+    m_current_game_index = settings->currentGameIndex();
 
-    m_tabbar->setCurrentIndex(current_game_index);
-    filltableWidget(current_game_index, result_index);
+    m_tabbar->setCurrentIndex(m_current_game_index);
+    filltableWidget();
 
     exec();
 }
@@ -67,9 +69,9 @@ void CRecordsDialog::fillTabWidget()
 }
 
 // Заполнить таблицу данными конкретной игры
-void CRecordsDialog::filltableWidget(int game_index, int result_index)
+void CRecordsDialog::filltableWidget()
 {
-    auto records_list = records_manager->gameRecords(settings->games()[game_index].first);
+    auto records_list = records_manager->gameRecords(settings->games()[m_tabbar->currentIndex()].first);
 
     m_table_widget->clear();
     m_table_widget->setRowCount(records_manager->maxRecord());
@@ -78,14 +80,14 @@ void CRecordsDialog::filltableWidget(int game_index, int result_index)
 
     auto n = 0;
     for (const auto &record : records_list) {
-        addTableItem(n, 0, record.date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)), result_index);
+        addTableItem(n, 0, record.date.toString(QLocale::system().dateFormat(QLocale::ShortFormat)));
 
         QTime t(0, 0, 0);
         t = t.addSecs(record.time);
-        addTableItem(n, 1, t.toString("hh:mm:ss"), result_index);
+        addTableItem(n, 1, t.toString("hh:mm:ss"));
 
-        addTableItem(n, 2, record.is_gravity ? tr("да") : tr("нет"), result_index);
-        addTableItem(n, 3, record.name, result_index);
+        addTableItem(n, 2, record.is_gravity ? tr("да") : tr("нет"));
+        addTableItem(n, 3, record.name);
 
         ++n;
     }
@@ -97,17 +99,17 @@ void CRecordsDialog::filltableWidget(int game_index, int result_index)
     }
 }
 
-void CRecordsDialog::addTableItem(int row, int column, const QString &text, int result_index)
+void CRecordsDialog::addTableItem(int row, int column, const QString &text)
 {
     auto item = new QTableWidgetItem(text);
     item->setTextAlignment(Qt::AlignCenter);
-    if (row == result_index)
+    if (row == m_result_index and m_tabbar->currentIndex() == m_current_game_index)
         item->setBackground(QBrush("#9cfff4"));
     m_table_widget->setItem(row, column, item);
 }
 
 // Изменилась закладка
-void CRecordsDialog::slotTabChanged(int index)
+void CRecordsDialog::slotTabChanged(int)
 {
-    filltableWidget(index);
+    filltableWidget();
 }
