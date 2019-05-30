@@ -4,6 +4,8 @@ project (red_shisen_sho)
 
 add_definitions(-Wall)
 
+include(get_version.cmake)
+
 # Языки трансляции
 set(LANGUAGES ru en)
 
