@@ -8,11 +8,11 @@ function(getVersion version date)
             OUTPUT_VARIABLE PROJECT_VERSION
             ERROR_QUIET
             )
-        if(${status})
+        if(${status} OR ${PROJECT_VERSION} EQUAL "")
             set(PROJECT_VERSION "0.0.0-0")
+            message("Error determining application version!!!")
         else()
             string(STRIP ${PROJECT_VERSION} PROJECT_VERSION)
-            message("PROJECT_VERSION = ${PROJECT_VERSION}")
             string(REGEX MATCH "[0-9]*.[0-9]*.[0-9]*-[0-9]*" PROJECT_VERSION ${PROJECT_VERSION})
         endif()
 
