@@ -269,7 +269,7 @@
         <translation>Table of records</translation>
     </message>
     <message>
-        <location filename="../src/crecordsdialog.cpp" line="+76"/>
+        <location filename="../src/crecordsdialog.cpp" line="+78"/>
         <source>Дата</source>
         <translation>Date</translation>
     </message>

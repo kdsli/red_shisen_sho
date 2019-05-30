@@ -4,7 +4,10 @@ project (red_shisen_sho)
 
 add_definitions(-Wall)
 
-include(get_version.cmake)
+include(cmake/get_version.cmake)
+
+getVersion(G_VERSION)
+message("Version = ${G_VERSION}")
 
 # Языки трансляции
 set(LANGUAGES ru en)
