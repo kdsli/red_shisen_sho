@@ -37,25 +37,6 @@ CRecordsManager::CRecordsManager(QObject *parent) : QObject(parent)
     m_record_available = fi.exists() && fi.isWritable() && fi.isReadable();
 
     loadRecords();
-
-    // Test
-    /*
-    m_records.clear();
-
-    CreateTestRecord(fz14x6, "kdsli", 100, 1);
-    CreateTestRecord(fz14x6, "kdsli", 150, 1);
-    CreateTestRecord(fz14x6, "kdsli", 200, 1);
-    CreateTestRecord(fz14x6, "kdsli", 250, 1);
-    CreateTestRecord(fz16x9, "kdsli", 100, 0);
-    CreateTestRecord(fz16x9, "kdsli", 200, 0);
-    CreateTestRecord(fz18x8, "kdsli", 100, 1);
-    CreateTestRecord(fz18x8, "kdsli", 150, 0);
-    CreateTestRecord(fz18x8, "kdsli", 300, 1);
-    CreateTestRecord(fz18x8, "kdsli", 400, 0);
-
-    saveRecords();
-    */
-
 }
 
 // Вернуть список рекордов для определенного типа игры
@@ -186,14 +167,4 @@ void CRecordsManager::saveRecords()
 
     // А буфер в файл - super encoding!
     ds << ba.toBase64();
-}
-
-void CRecordsManager::CreateTestRecord(GameType game, const QString &name, int time, bool is_gravity)
-{
-    Record record;
-    record.name = name;
-    record.time = time;
-    record.is_gravity = is_gravity;
-    m_records[game].append(record);
-
 }

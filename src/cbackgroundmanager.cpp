@@ -19,11 +19,11 @@ static const QStringList filters_images{"*.jpg", "*.png"};
 static const QString user_dir_name = "UserBackgroungs";
 
 CBackgroundManager::CBackgroundManager(QObject *parent) : QObject(parent),
-    m_lib_dir(settings->mahjonggLibDir() + backgrounds_dir + QDir::separator())
+    m_lib_dir(settings->mahjonggLibDir() + backgrounds_dir + QDir::separator()),
+    m_user_dir(qApp->applicationDirPath() + QDir::separator() + user_dir_name + QDir::separator())
 {
 
     // Проверим существование пользовательской директории и создадим ее если надо
-    m_user_dir = qApp->applicationDirPath() + QDir::separator() + user_dir_name + QDir::separator();
     QDir dir(m_user_dir);
     if (!dir.exists()) dir.mkdir(m_user_dir);
 

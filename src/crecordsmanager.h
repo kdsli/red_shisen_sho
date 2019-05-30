@@ -12,8 +12,8 @@ struct Record
 {
     QDate date;
     QString name;
-    int time;         // Количество секунд
-    bool is_gravity;
+    int time{};         // Количество секунд
+    bool is_gravity{};
 
     Record() : date(QDate::currentDate()) {}
 };
@@ -28,7 +28,7 @@ class CRecordsManager : public QObject
 {
     Q_OBJECT
 public:
-    CRecordsManager(QObject *parent = nullptr);
+    explicit CRecordsManager(QObject *parent = nullptr);
 
     // Вернуть список рекордов для определенного типа игры
     RecordList &gameRecords(GameType);
@@ -49,7 +49,6 @@ private:
     void loadRecords();
     void saveRecords();
 
-    void CreateTestRecord(GameType game, const QString &name, int time, bool is_gravity);
 };
 
 extern CRecordsManager *records_manager;
