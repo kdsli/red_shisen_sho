@@ -30,12 +30,12 @@ void CField::newGame(int x, int y, int count)
     // Распределяем костяшки
     // Возможно, что типов костяшек не хватит заполнить все поле (есть такие поля)
     // тогда начинаем заполнять оставшиеся поля с начала
-    int type{0}, n{0};
+    int type{0}, n{0}, max_n(m_count_in_type / 2);
     int max_type{tiles_manager->tilesNames().size()};
     for (int i = 0; i < m_tiles_count; i += 2) {
         m_tiles[v[i]] = type;
         m_tiles[v[i+1]] = type;
-        if (++n == m_count_in_type) {
+        if (++n == max_n) {
             n = 0;
             if (++type == max_type) type = 0;
         }

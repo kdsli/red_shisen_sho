@@ -14,9 +14,12 @@ class CField : public QObject
 public:
     explicit CField(QObject *parent = nullptr);
 
-    const Field *field() const { return &m_tiles; }
+    const Field &tiles() const { return m_tiles; }
+    int x() const { return m_x; }
+    int y() const { return m_y; }
 
     void newGame(int x, int y, int count_in_type);
+
 
 private:
     // Размеры поля
@@ -27,7 +30,7 @@ private:
     Field m_tiles;
 
     // Перемешать массив
-    void shuffleField(Field &field) const;
+    void shuffleField(Field &tiles) const;
 };
 
 #endif // CFIELD_H

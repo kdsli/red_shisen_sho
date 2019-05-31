@@ -34,6 +34,10 @@ public:
     // Массив наименований костяшек
     const QStringList &tilesNames() const { return m_tiles_names; }
 
+    // Исходная ширина и высота костяшек
+    const QSizeF base_size() const { return m_base_size; }
+    const QSizeF tile_size() const { return m_tile_size; }
+
 signals:
     void signalChangeTilesets();
 
@@ -45,6 +49,8 @@ private:
     // Список названий костяшек
     QStringList m_tiles_names;
     QSvgRenderer *m_renderer;
+    QSizeF m_base_size;
+    QSizeF m_tile_size;
 
     void addTileSeries(const QString &series_name, int count);
 

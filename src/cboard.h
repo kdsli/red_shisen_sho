@@ -1,22 +1,37 @@
 #ifndef CBOARD_H
 #define CBOARD_H
 
-#include "cgame.h"
 #include "cscene.h"
+#include "cfield.h"
+#include "csettings.h"
 
 #include <QObject>
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QHash>
+
+// Запись за тип поля
+struct FieldRec
+{
+    // Размеры поля
+    quint16 x;
+    quint16 y;
+    // Количество одинаковых костяшек для каждого типа
+    quint16 count;
+};
 
 // Виджет доски отображения игры, отвечает за взаимодействие с пользователем
-// Управление игрой идет в объекте CGame, который владеет классом CField,
-// непосредственно манипулирующего данными игры, и объектом сцены CScene
+// и управление игрой. Владеет классом CField, непосредственно манипулирующего
+// данными игры, и объектом сцены CScene
 
 class CBoard : public QGraphicsView
 {
     Q_OBJECT
 public:
     explicit CBoard(QWidget *parent = nullptr);
+
+    // Состояние игры
+    enum GameState { gsEmpty, gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
 
     QString gameInfo();
 
@@ -37,8 +52,11 @@ public slots:
     void slotSetBackground();
 
 private:
+    GameState m_game_state;
+    CField *m_field;
     CScene *m_scene;
-    CGame *m_game;
+    // Данные типов игр
+    QHash<GameType, FieldRec> m_field_types;
 
 };
 

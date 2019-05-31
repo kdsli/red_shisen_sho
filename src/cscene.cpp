@@ -3,12 +3,14 @@
 #include "csettings.h"
 #include "cbackgroundmanager.h"
 #include "ctilesmanager.h"
+#include "cfield.h"
 
 #include <QFileInfo>
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
 
-CScene::CScene(QObject *parent) : QGraphicsScene(parent)
+CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
+    m_field(field)
 {
 
 }
@@ -45,24 +47,32 @@ void CScene::setBackground(const QString &file_name)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CScene::newGame(const Field *field)
+void CScene::newGame()
 {
     clear();
 
-    for (const auto &tile : *field) {
-        QPoint point(50, 50);
+    QPointF point(0, 0);
+    int n = 0;
 
-        auto item_base = new QGraphicsSvgItem;
-        item_base->setSharedRenderer(tiles_manager->currentRenderer());
-        item_base->setElementId("TILE_2");
-        item_base->setPos(point);
-        addItem(item_base);
+    for (int y = 0; y < m_field->y(); ++y) {
+        for (int x = 0; x < m_field->x(); ++x) {
 
-        auto item_tile = new QGraphicsSvgItem;
-        item_tile->setSharedRenderer(tiles_manager->currentRenderer());
-        item_tile->setElementId(tiles_manager->tilesNames()[tile]);
-        item_tile->setPos(point);
-        addItem(item_tile);
+            auto item_base = new QGraphicsSvgItem;
+            item_base->setSharedRenderer(tiles_manager->currentRenderer());
+            item_base->setElementId("TILE_2");
+            item_base->setPos(point);
+            addItem(item_base);
+
+            auto item_tile = new QGraphicsSvgItem;
+            item_tile->setSharedRenderer(tiles_manager->currentRenderer());
+            item_tile->setElementId(tiles_manager->tilesNames()[m_field->tiles()[n++]]);
+            item_tile->setPos(point);
+            addItem(item_tile);
+
+            point.setX(point.x() + tiles_manager->tile_size().width());
+        }
+        point.setX(0);
+        point.setY(point.y() + tiles_manager->tile_size().height());
     }
 }
 
@@ -71,4 +81,11 @@ void CScene::newGame(const Field *field)
 void CScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
     painter->drawPixmap(rect, m_bg_pixmap, m_bg_pixmap.rect());
+}
+
+// ------------------------------------------------------------------------------------------------
+void CScene::drawForeground(QPainter *painter, const QRectF &rect)
+{
+//    painter->drawLine(rect.topLeft(), rect.bottomRight());
+//    QGraphicsScene::drawForeground(painter, rect);
 }

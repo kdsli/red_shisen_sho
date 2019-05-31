@@ -120,6 +120,11 @@ void CTilesManager::initCurrentFile()
 
     if (m_renderer) delete m_renderer;
     m_renderer = new QSvgRenderer(currentFile());
+
+    // Базовый размер основы и костяшки
+    getTileSize("TILE_2", m_base_size);
+    getTileSize("CHARACTER_2", m_tile_size);
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -134,25 +139,23 @@ void CTilesManager::loadSvg(const QString &file_name)
     svg->setSharedRenderer(renderer);
 
     // Рисуем tile Image
-    QImage img_tile(tile_size, QImage::Format_ARGB32_Premultiplied);
+    QImage img_tile(::tile_size, QImage::Format_ARGB32_Premultiplied);
     img_tile.fill(0);
     QPainter painter_tile(&img_tile);
-    painter_tile.save();
     painter_tile.setRenderHint(QPainter::Antialiasing);
     renderer->render(&painter_tile, "CHARACTER_2");
-    painter_tile.restore();
+    painter_tile.end();
 
     // Рисуем base Image
-    QImage img(base_size, QImage::Format_ARGB32_Premultiplied);
+    QImage img(::base_size, QImage::Format_ARGB32_Premultiplied);
     img.fill(0);
     QPainter painter(&img);
-    painter.save();
     painter.setRenderHint(QPainter::Antialiasing);
     renderer->render(&painter, "TILE_2");
     // И сверху костяшку
-    auto tile_rect = QRectF(QPointF(0, 0), tile_size);
+    auto tile_rect = QRectF(QPointF(0, 0), ::tile_size);
     painter.drawImage(tile_rect, img_tile, tile_rect);
-    painter.restore();
+    painter.end();
 
     // И сохраним как зависимый Pixmap
     file.pixmap = QPixmap::fromImage(img);
@@ -171,7 +174,7 @@ void CTilesManager::slotDirectoryChanged(const QString &)
 // ------------------------------------------------------------------------------------------------
 void CTilesManager::addTileSeries(const QString &series_name, int count)
 {
-    for (int i  = 0; i < count; ++i) {
+    for (int i  = 1; i < count + 1; ++i) {
         m_tiles_names.append(series_name + "_" + QString::number(i));
     }
 }
