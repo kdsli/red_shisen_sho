@@ -2,7 +2,7 @@
 #include "ui_cmainwindow.h"
 
 #include "csettings.h"
-#include "version.h"
+#include "version.inc"
 
 #include <QMessageBox>
 #include <QPushButton>

@@ -22,7 +22,8 @@ set(TS_SRC_DIR ${ROOT_DIR}/translations)
 unset(QT_QMAKE_EXECUTABLE)
 
 # Version
-set(VERSION_FILE ${SOURCE_DIR}/version.h)
+set(VERSION_INC version.inc)
+set(VERSION_FILE ${SOURCE_DIR}/${VERSION_INC})
 include(cmake/get_version.cmake)
 
 getVersion(PROG_VERSION PROG_DATE)
@@ -33,7 +34,7 @@ if(EXISTS ${VERSION_FILE})
     string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+" VERSION_IN_FILE ${str})
     message("File version = [${VERSION_IN_FILE}]")
     if(${VERSION_IN_FILE})
-        message("Version values are not readed from file src/version.h")
+        message("Version values are not readed from file src/${VERSION_INC}")
         write_version_file(${VERSION_FILE} ${PROG_VERSION} ${PROG_DATE})
     else()
         if(NOT ${VERSION_IN_FILE} STREQUAL ${PROG_VERSION})

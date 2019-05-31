@@ -7,4 +7,4 @@ output_debug
 output_Release
 output_release
 CMakeLists.txt.user
-src/version.h
+src/version.inc
