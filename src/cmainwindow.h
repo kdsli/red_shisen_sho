@@ -21,7 +21,7 @@ public:
 
 private:
     Ui::CMainWindow *ui;
-    CBoard *m_board;
+    CBoard*m_board;
     COptionsDialog *m_options_dialog;
     CRecordsDialog *m_record_dialog;
 

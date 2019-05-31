@@ -3,6 +3,7 @@
 
 #include <QPixmap>
 #include <QFileSystemWatcher>
+#include <QSvgRenderer>
 
 struct TilesFile {
     QString file_name;
@@ -24,11 +25,14 @@ public:
 
     // Текущий выбранный файл
     QString currentFile();
+    // Индекс текущего файла в списке файлов
     int currentIndex();
 
-    // Признак того, что в текущем наборе правильно выводятся SEASON и FLOWER
-    // См. ремарку к реализации
-    bool isCorrectSVG();
+    // Renderer текущего файла
+    QSvgRenderer *currentRenderer() const { return m_renderer; }
+
+    // Массив наименований костяшек
+    const QStringList &tilesNames() const { return m_tiles_names; }
 
 signals:
     void signalChangeTilesets();
@@ -38,9 +42,20 @@ private:
     // Список файлов
     QVector<TilesFile> m_files;
     QFileSystemWatcher m_watcher;
+    // Список названий костяшек
+    QStringList m_tiles_names;
+    QSvgRenderer *m_renderer;
+
+    void addTileSeries(const QString &series_name, int count);
 
     void initFiles();
+    void initCurrentFile();
     void loadSvg(const QString &);
+
+    // См. комментарий с ctilesmanager.cpp
+    bool isCorrectSVG();
+
+    void getTileSize(const QString &tile_name, QSizeF &size) const;
 
 private slots:
     void slotDirectoryChanged(const QString &);

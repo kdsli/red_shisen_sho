@@ -43,9 +43,8 @@ QString CBackgroundManager::currentFile()
 {
     // Из какой директории брать файл определим по расширению
     auto file_name = settings->bgName();
-    auto ext = QFileInfo(file_name).suffix();
 
-    if (ext.startsWith("svg", FILE_NAME_SENSITIVITY))
+    if (isCurrentSvg())
         return m_lib_dir + file_name;
     else
         return m_user_dir + file_name;
@@ -53,8 +52,7 @@ QString CBackgroundManager::currentFile()
 
 bool CBackgroundManager::isCurrentSvg()
 {
-    auto file_name = settings->bgName();
-    auto ext = QFileInfo(file_name).suffix();
+    auto ext = QFileInfo(settings->bgName()).suffix();
 
     return ext.startsWith("svg", FILE_NAME_SENSITIVITY);
 }

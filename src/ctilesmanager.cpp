@@ -8,6 +8,21 @@
 #include <QGraphicsSvgItem>
 #include <QPainter>
 
+/*
+ * CHARACTER_x 1-9 иероглифы
+ * ROD_x 1-9 кружочки
+ * BAMBOO_x 1-9 палочки, начиная с дракона
+ * DRAGON_x 1-3 пусто, зеленый иероглиф, красное Ф
+ * FLOWER_x 1-4 цветы без горшков
+ * SEASON_x 1-4 цветы в горшках
+ * WIND_x 1-4 N, S, E, W
+ * TILE_x 1-4 (северо-восток, юго-восток, юго-запад, северо-запад)
+ * TILE_x_SEL 1-4 тоже выделено
+ * TILE_SHAD_SEL (67x96)
+ * TILE_SHAD_NORM
+ *
+*/
+
 CTilesManager *tiles_manager{nullptr};
 
 static const QString tiles_dir = "tilesets";
@@ -15,21 +30,27 @@ static const QSize base_size = QSize(96, 116);
 static const QSize tile_size = QSize(69, 89);
 static const QStringList filters_svg{"*.svg", "*.svgz"};
 
+// ------------------------------------------------------------------------------------------------
 CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
-    m_lib_dir(settings->mahjonggLibDir() + tiles_dir + QDir::separator())
+    m_lib_dir(settings->mahjonggLibDir() + tiles_dir + QDir::separator()),
+    m_renderer(nullptr)
 {
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &CTilesManager::slotDirectoryChanged);
     m_watcher.addPath(m_lib_dir);
 
     initFiles();
+
+    initCurrentFile();
 }
 
+// ------------------------------------------------------------------------------------------------
 QString CTilesManager::currentFile()
 {
     return m_lib_dir + settings->currentTilesetName();
 }
 
+// ------------------------------------------------------------------------------------------------
 int CTilesManager::currentIndex()
 {
     auto file_name = settings->currentTilesetName();
@@ -40,6 +61,7 @@ int CTilesManager::currentIndex()
     return it == m_files.cend() ? -1 : static_cast<int>(std::distance(m_files.cbegin(), it));
 }
 
+// ------------------------------------------------------------------------------------------------
 // Признак того, что в текущем наборе правильно выводятся SEASON и FLOWER
 // Два файла из поставки KDE в этих элементах не содержат изображения, а
 // содержать линк на элементы других элементов. Например, на рамку и цифру.
@@ -54,6 +76,19 @@ bool CTilesManager::isCorrectSVG()
             && file_name.compare("egypt.svgz") != 0;
 }
 
+// ------------------------------------------------------------------------------------------------
+// Получить размеры костяшки
+void CTilesManager::getTileSize(const QString &tile_name, QSizeF &size) const
+{
+    QGraphicsSvgItem item;
+    item.setSharedRenderer(m_renderer);
+    item.setElementId(tile_name);
+    size.setWidth(item.boundingRect().toRect().width());
+    size.setHeight(item.boundingRect().toRect().height());
+}
+
+// ------------------------------------------------------------------------------------------------
+// Читаем все файлы в директории
 void CTilesManager::initFiles()
 {
     m_files.clear();
@@ -69,6 +104,25 @@ void CTilesManager::initFiles()
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Инициализация текущего файла
+void CTilesManager::initCurrentFile()
+{
+    m_tiles_names.clear();
+
+    addTileSeries("CHARACTER", 9);
+    addTileSeries("ROD", 9);
+    addTileSeries("BAMBOO", 9);
+    addTileSeries("DRAGON", 3);
+    addTileSeries("FLOWERS", 4);
+    addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
+    addTileSeries("WIND", 4);
+
+    if (m_renderer) delete m_renderer;
+    m_renderer = new QSvgRenderer(currentFile());
+}
+
+// ------------------------------------------------------------------------------------------------
 void CTilesManager::loadSvg(const QString &file_name)
 {
     TilesFile file;
@@ -105,10 +159,19 @@ void CTilesManager::loadSvg(const QString &file_name)
     m_files.append(std::move(file));
 }
 
+// ------------------------------------------------------------------------------------------------
 // Слот обработки изменения директории
 void CTilesManager::slotDirectoryChanged(const QString &)
 {
     initFiles();
     // Сказать окну настроек, что изменилась директория
     emit signalChangeTilesets();
+}
+
+// ------------------------------------------------------------------------------------------------
+void CTilesManager::addTileSeries(const QString &series_name, int count)
+{
+    for (int i  = 0; i < count; ++i) {
+        m_tiles_names.append(series_name + "_" + QString::number(i));
+    }
 }

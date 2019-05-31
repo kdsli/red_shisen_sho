@@ -2,6 +2,10 @@
 #include "ui_cmainwindow.h"
 
 #include "csettings.h"
+#include "cbackgroundmanager.h"
+#include "ctilesmanager.h"
+#include "crecordsmanager.h"
+
 #include "version.inc"
 
 #include <QMessageBox>
@@ -10,7 +14,7 @@
 
 CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     ui(new Ui::CMainWindow),
-    m_board(new CBoard(this)),
+    m_board(nullptr),
     m_options_dialog(nullptr),
     m_record_dialog(nullptr)
 {
@@ -18,20 +22,27 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 
     settings->RegisterGeometry(this);
 
+    // Инициализация менеджеров костяшек, фонов, рекордов
+    tiles_manager = new CTilesManager(this);
+    bg_manager = new CBackgroundManager(this);
+    records_manager = new CRecordsManager(this);
+
+    // Доска отображения игры
+    m_board = new CBoard(this);
     setCentralWidget(m_board);
 
     connect(ui->acExit, &QAction::triggered, this, &CMainWindow::close);
+    connect(ui->acOptions, &QAction::triggered, this, &CMainWindow::slotOptions);
+    connect(ui->acRecords, &QAction::triggered, this, &CMainWindow::slotRecords);
+    connect(ui->acAbout, &QAction::triggered, this, &CMainWindow::slotAbout);
+
     connect(ui->acNewGame, &QAction::triggered, m_board, &CBoard::slotNewGame);
     connect(ui->acRepeat, &QAction::triggered, m_board, &CBoard::slotRepeatGame);
     connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHelp);
     connect(ui->acPause, &QAction::triggered, m_board, &CBoard::slotPause);
-    connect(ui->acOptions, &QAction::triggered, this, &CMainWindow::slotOptions);
-    connect(ui->acRecords, &QAction::triggered, this, &CMainWindow::slotRecords);
 
     connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::signalUndo);
     connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::signalRedo);
-
-    connect(ui->acAbout, &QAction::triggered, this, &CMainWindow::slotAbout);
 
     connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
     connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);

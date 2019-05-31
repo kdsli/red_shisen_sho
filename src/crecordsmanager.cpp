@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDataStream>
+#include <QGraphicsSvgItem>
 
 CRecordsManager *records_manager = nullptr;
 
@@ -168,3 +169,4 @@ void CRecordsManager::saveRecords()
     // А буфер в файл - super encoding!
     ds << ba.toBase64();
 }
+
