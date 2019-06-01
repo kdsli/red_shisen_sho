@@ -20,10 +20,10 @@ public:
 
     // Поле
     const Field &tiles() const { return m_tiles; }
-
-    // Получить индекс в массиве m_tiles по координатам
+    // Получить индекс в массиве Field по координатам
     int getIndex(int x, int y) const;
 
+    // Новая игра
     void newGame(int x, int y, int count_in_type);
 
 private:
@@ -33,9 +33,53 @@ private:
     int m_tiles_count;
     // Поле
     Field m_tiles;
+    // Список правильных снятий, вычисленных на этапе определения вариантов
+    TilePairList m_right_pathes;
+    // Текущий путь
+    TileList m_path;
+    // Список костяшек, которые должны быть удалены
+    TileList m_deleted_list;
+
+    // Получить индекс в массиве m_tiles по координатам
+    int getIndex(Tile tile) const;
+    // Обратная процедура - получить костяшку (координаты) по индексу
+    Tile getTile(int index) const;
 
     // Перемешать массив
     void shuffleField(Field &tiles) const;
+
+    // Сделать так, чтобы существовал минимум один путь снятия
+    void shuffleDecisionVariant();
+    // Снять все возможные костяшки (вызывается из shuffleDecisionVariant)
+    void takeTilesOff(Field &field, Field &collation, int &currentTile_count);
+
+    // Проверить существование вариантов снятия
+    bool checkVariants(const Field &field, TilePair &tiles);
+    // Проверка возможности снятия пары костяшек
+    bool checkConnect(const Field &field, TilePair tiles);
+
+    // Алгоритмы поиска
+    bool checkDirectHorz(const Field &field, TilePair tiles);
+    bool checkDirectVert(const Field &field, TilePair tiles);
+    bool checkDoubleLines(const Field &field, TilePair tiles);
+    bool checkTowardsHorz(const Field &field, TilePair tiles);
+    bool checkTowardsVert(const Field &field, TilePair tiles);
+    bool checkDirectionHorz(const Field &field, TilePair tiles);
+    bool checkDirectionVert(const Field &field, TilePair tiles);
+
+    // Проверка доступности горизонтальной линии (т.е. без встречных костяшек)
+    bool checkHorzLine(const Field &field, int x1, int x2, int y, bool is_last_empty) const;
+    // Проверка доступности вертикальной линии
+    bool checkVertLine(const Field &field, int x, int y1, int y2, bool is_last_empty) const;
+    // Проверить, насколько далеко можно уйти по горизонтали
+    int farHorz(const Field &field, Tile tile, int direct, int limit) const;
+    // Проверить, насколько далеко можно уйти по вертикали
+    int farVert(const Field &field, Tile tile, int direct, int limit) const;
+
+    // Удалить костяшки
+    void clearTiles(Field &field, TilePair tiles);
+    // Сдвинуть колонку вниз
+    void columnMoveDown(Field &field, const Tile &);
 };
 
 #endif // CFIELD_H
