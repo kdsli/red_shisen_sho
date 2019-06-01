@@ -2,7 +2,7 @@ find_package(Git REQUIRED)
 
 function(getVersion version date)
     if (GIT_EXECUTABLE)
-        execute_process(COMMAND ${GIT_EXECUTABLE} describe --tag --match "[0-9]*.[0-9]*.[0-9]*"
+        execute_process(COMMAND ${GIT_EXECUTABLE} describe --tag
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             RESULT_VARIABLE status
             OUTPUT_VARIABLE PROJECT_VERSION
@@ -13,7 +13,10 @@ function(getVersion version date)
             message("Error determining application version!!!")
         else()
             string(STRIP ${PROJECT_VERSION} PROJECT_VERSION)
-            string(REGEX MATCH "[0-9.-]*" PROJECT_VERSION ${PROJECT_VERSION})
+            string(REGEX MATCH "[0-9]+\.[0-9]+\.[0-9]+(-[0-9+]+)?" PROJECT_VERSION ${PROJECT_VERSION})
+            if (${CMAKE_MATCH_0})
+                set(PROJECT_VERSION "0.0.0-0")
+            endif()
         endif()
 
         execute_process(COMMAND ${GIT_EXECUTABLE} show -s --format=%ci
