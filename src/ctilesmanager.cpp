@@ -113,10 +113,10 @@ void CTilesManager::initCurrentFile()
     addTileSeries("CHARACTER", 9);
     addTileSeries("ROD", 9);
     addTileSeries("BAMBOO", 9);
-    addTileSeries("DRAGON", 3);
-    addTileSeries("FLOWERS", 4);
-    addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
     addTileSeries("WIND", 4);
+    addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
+    addTileSeries("DRAGON", 3);
+    addTileSeries("FLOWER", 4);
 
     if (m_renderer) delete m_renderer;
     m_renderer = new QSvgRenderer(currentFile());

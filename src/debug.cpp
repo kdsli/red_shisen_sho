@@ -7,21 +7,15 @@
 
 #include <QDebug>
 
-static int m_x;
-static int m_y;
-
 // Инициализация отладочных механизмов
-void initDebug(int x, int y)
+void initDebug()
 {
-    m_x = x;
-    m_y = y;
-
     QFile file("dump.txt");
     file.open(QIODevice::WriteOnly);
     file.close();
 }
 
-void PrintDump(const QString &title, QVector<int> &field, int current_count)
+void PrintDump(const QString &title, QVector<int> &field, int _x, int _y, int current_count)
 {
     QFile file("dump.txt");
     file.open(QIODevice::Append);
@@ -32,15 +26,15 @@ void PrintDump(const QString &title, QVector<int> &field, int current_count)
     ts << title << " " << current_count << endl << endl;
 
     ts << "     ";
-    for (int i = 0; i < m_x; ++i) {
+    for (int i = 0; i < _x; ++i) {
         ts << i << " ";
     }
     ts << endl;
 
     int n = 0;
-    for (int y = 0; y < m_y; ++y) {
+    for (int y = 0; y < _y; ++y) {
         ts << y << "  ";
-        for (int x = 0; x < m_x; ++x) {
+        for (int x = 0; x < _x; ++x) {
             ts << field[n++] << " ";
         }
         ts << endl;
@@ -57,9 +51,10 @@ void PrintDump(const QString &title, QVector<int> &field, int current_count)
     ts << endl << endl;
 }
 
-QPoint getPoint(int index)
+/*
+QPoint getPoint(int index, int x, int y)
 {
-    return QPoint(index % m_x, index / m_x);
+    return QPoint(index % x, index / x);
 }
 
 void PrintTiles(const QString &title, const QVector<int> &field, const QVector<int> &tiles)
@@ -76,6 +71,7 @@ void PrintTiles(const QString &title, const QVector<int> &field, const QVector<i
     }
     ts << endl << endl;
 }
+*/
 
 // Проверим, сколько костяшек одного типа находится в поле
 void CheckField(const QVector<int> &field, int type_count)

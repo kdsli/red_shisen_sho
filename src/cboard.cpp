@@ -17,9 +17,9 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_scene(nullptr)
 {
     setFrameStyle(QFrame::NoFrame);
-//    setAttribute(Qt::WA_NoSystemBackground);
-//    setAttribute(Qt::WA_OpaquePaintEvent);
-//    QGraphicsView::DontAdjustForAntialiasing
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing);
 
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -83,7 +83,7 @@ void CBoard::slotPause()
 
 void CBoard::slotNewTypeGame()
 {
-
+    slotNewGame();
 }
 
 void CBoard::slotSetTileset()
@@ -97,14 +97,12 @@ void CBoard::slotSetBackground()
     m_scene->setBackground(bg_manager->currentFile());
 }
 
-void CBoard::resizeEvent(QResizeEvent *event)
+void CBoard::resizeEvent(QResizeEvent *)
 {
-    qWarning() << "Board::resizeEvent" << event->size();
-    recalcScene(event->size());
+    recalcScene();
 }
 
-void CBoard::recalcScene(QSize size)
+void CBoard::recalcScene()
 {
-    qWarning() << "CBoard::recalcScene" << m_scene->fieldRect();
     fitInView(m_scene->fieldRect(), Qt::KeepAspectRatio);
 }

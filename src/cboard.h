@@ -63,7 +63,7 @@ private:
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
 
-    void recalcScene(QSize size = QSize());
+    void recalcScene();
 
 };
 

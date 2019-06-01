@@ -7,9 +7,9 @@
 #include <QTextStream>
 #include <QRectF>
 
-void initDebug(int x, int y);
-void PrintDump(const QString &title, QVector<int> &field, int current_count);
-void PrintTiles(const QString &title, const QVector<int> &field, const QVector<int> &tiles);
+void initDebug();
+void PrintDump(const QString &title, QVector<int> &field, int x, int y, int current_count);
+//void PrintTiles(const QString &title, const QVector<int> &field, const QVector<int> &tiles);
 void CheckField(const QVector<int> &, int);
 
 void printStringList(const QStringList &);
