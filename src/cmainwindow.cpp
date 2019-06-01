@@ -128,7 +128,7 @@ void CMainWindow::slotAbout()
 {
     QString version, date;
 
-    QRegExp re(R"==(([0-9]+\.[0-9]+\.[0-9]+-[0-9]+)\s+(.+))==");
+    QRegExp re(R"==(([0-9]+\.[0-9]+\.[0-9]+(?=-[0-9]+)?)\s+(.+))==");
     if (re.indexIn(program_version) == 0) {
         version = re.cap(1);
         date = re.cap(2);

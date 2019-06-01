@@ -8,7 +8,7 @@ find_package(OpenGL REQUIRED)
 
 if (${Qt5OpenGL_FOUND})
     message("Found Qt5OpenGL")
-#    add_definitions(-DDEFINED_OPENGL)
+    add_definitions(-DDEFINED_OPENGL)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -42,7 +42,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/kmahjongglib DESTINATION ${EXECUTABLE_OU
 
 # Чтобы не появлялось окно командной строки при запуске в Windows
 IF(WIN32)
-SET(GUI_TYPE WIN32)
+    set(GUI_TYPE WIN32)
 ENDIF(WIN32)
 
 add_executable(

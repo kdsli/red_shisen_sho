@@ -19,6 +19,7 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     setFrameStyle(QFrame::NoFrame);
 //    setAttribute(Qt::WA_NoSystemBackground);
 //    setAttribute(Qt::WA_OpaquePaintEvent);
+//    QGraphicsView::DontAdjustForAntialiasing
 
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
