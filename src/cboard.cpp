@@ -4,17 +4,21 @@
 #include "cbackgroundmanager.h"
 #include "ctilesmanager.h"
 
+#ifdef DEFINED_OPENGL
+#include <QtOpenGL/QGLWidget>
+#endif
+
 #include <QResizeEvent>
-//#include <QtOpenGL/QGLWidget>
+
+#include <QDebug>
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
-    m_scene(new CScene(m_field, this))
+    m_scene(nullptr)
 {
     setFrameStyle(QFrame::NoFrame);
-
-    setScene(m_scene);
-    m_scene->setBackground(bg_manager->currentFile());
+//    setAttribute(Qt::WA_NoSystemBackground);
+//    setAttribute(Qt::WA_OpaquePaintEvent);
 
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -27,6 +31,17 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field_types.insert(fz24x12, {24, 12, 8});
     m_field_types.insert(fz26x14, {26, 14, 8});
     m_field_types.insert(fz30x16, {30, 16, 12});
+
+#ifdef DEFINED_OPENGL
+    setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer)));
+#endif
+}
+
+void CBoard::createScene()
+{
+    m_scene = new CScene(m_field, this);
+    m_scene->setBackground(bg_manager->currentFile());
+    setScene(m_scene);
 
     slotNewGame();
 }
@@ -81,16 +96,14 @@ void CBoard::slotSetBackground()
     m_scene->setBackground(bg_manager->currentFile());
 }
 
-void CBoard::resizeEvent(QResizeEvent *)
+void CBoard::resizeEvent(QResizeEvent *event)
 {
-    recalcScene();
+    qWarning() << "Board::resizeEvent" << event->size();
+    recalcScene(event->size());
 }
 
-void CBoard::recalcScene()
+void CBoard::recalcScene(QSize size)
 {
-    auto rect = m_scene->itemsBoundingRect();
-    rect.setWidth(rect.width() * 1.1);
-    rect.setHeight(rect.height() * 1.1);
-
-    fitInView(rect, Qt::KeepAspectRatio);
+    qWarning() << "CBoard::recalcScene" << m_scene->fieldRect();
+    fitInView(m_scene->fieldRect(), Qt::KeepAspectRatio);
 }

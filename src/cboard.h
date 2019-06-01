@@ -33,6 +33,8 @@ public:
     // Состояние игры
     enum GameState { gsEmpty, gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
 
+    void createScene();
+
     QString gameInfo();
 
 signals:
@@ -61,7 +63,7 @@ private:
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
 
-    void recalcScene();
+    void recalcScene(QSize size = QSize());
 
 };
 

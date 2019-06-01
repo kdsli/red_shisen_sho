@@ -11,10 +11,10 @@
 class CKeeperSettings : public QSettings
 {
 public:
-    void RegisterGeometry(QWidget *widget);
+    void registerGeometry(QWidget *widget);
 
 private:
-    void DoExit(QObject *obj);
+    void doExit(QObject *obj);
 };
 
 #endif // CKEEPERSETTINGS_H

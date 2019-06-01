@@ -15,6 +15,8 @@ class CScene : public QGraphicsScene
 public:
     explicit CScene(CField *field, QObject *parent = nullptr);
 
+    const QRectF &fieldRect() const { return m_field_rect; }
+
     void setBackground(const QString &file_name);
 
     void newGame();
@@ -26,6 +28,8 @@ protected:
 private:
     QPixmap m_bg_pixmap;
     CField *m_field;
+    // Rect поля
+    QRectF m_field_rect;
 
 };
 

@@ -101,3 +101,7 @@ void printStringList(const QStringList &list)
     }
 }
 
+QTextStream& operator<<(QTextStream& stream, const QRectF& rect) {
+    stream << "TopLeft (" << rect.left() << ", " << rect.y() << ") Size (" << rect.width() << ", " << rect.height() << ")";
+    return stream;
+}

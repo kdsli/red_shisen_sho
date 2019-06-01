@@ -9,12 +9,11 @@
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
 
-#include "debug.h"
+#include <QDebug>
 
 CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
     m_field(field)
 {
-    initDebug(0, 0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -77,33 +76,36 @@ void CScene::newGame()
         point.setY(point.y() + tiles_manager->tileSize().height());
     }
 
-//    auto rect = QRectF(0, 0,
-//                       tiles_manager->tileSize().width() * m_field->x() * 1.1,
-//                       tiles_manager->tileSize().height() * m_field->y() * 1.1);
+    // Реальная ширина/высота поля с учетом дополнительного фон
+    auto w = tiles_manager->tileSize().width() * m_field->x() +
+            (tiles_manager->baseSize().width() - tiles_manager->tileSize().width());
+    auto h = tiles_manager->tileSize().height() * m_field->y() +
+            (tiles_manager->baseSize().height() - tiles_manager->tileSize().height());
+    auto rect = QRectF(0, 0, w, h);
 
-//    setSceneRect(rect);
+    // Это и есть размер поля
+    setSceneRect(rect);
+
+    // m_field_rect - это поле с границами, т.е. то, что должно входить в экран
+    // при масштабировании. Больше поля на 10%
+    m_field_rect = rect;
+    m_field_rect.setWidth(m_field_rect.width() * 1.1);
+    m_field_rect.setHeight(m_field_rect.height() * 1.1);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Отобразить фоновое изображение
 void CScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    printVariable<QRectF>("drawBackground", rect);
     painter->drawPixmap(rect, m_bg_pixmap, m_bg_pixmap.rect());
 }
 
-// Временно
-QTextStream& operator<<(QTextStream& stream, const QRectF& rect) {
-    stream << "TopLeft (" << rect.left() << ", " << rect.y() << ") Size (" << rect.width() << ", " << rect.height() << ")";
-    return stream;
-}
-
 // ------------------------------------------------------------------------------------------------
-void CScene::drawForeground(QPainter *painter, const QRectF &rect)
+void CScene::drawForeground(QPainter *, const QRectF &)
 {
-    auto r = sceneRect();
-    QPen pen(Qt::red);
-    pen.setWidth(3);
-    painter->setPen(pen);
-    painter->drawLine(r.topLeft(), r.bottomRight());
+//    auto r = sceneRect();
+//    QPen pen(Qt::red);
+//    pen.setWidth(3);
+//    painter->setPen(pen);
+//    painter->drawLine(r.topLeft(), r.bottomRight());
 }

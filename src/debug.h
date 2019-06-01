@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QFile>
 #include <QTextStream>
+#include <QRectF>
 
 void initDebug(int x, int y);
 void PrintDump(const QString &title, QVector<int> &field, int current_count);
@@ -22,6 +23,8 @@ void printVariable(const QString &text, T t)
 
     ts << text << " = " << t << endl;
 }
+
+QTextStream& operator<<(QTextStream& stream, const QRectF& rect);
 
 
 #endif // DEBUG_H

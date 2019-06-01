@@ -2,6 +2,9 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QMainWindow>
+
+#include <QDebug>
 
 static const QString GEOMETRY_GROUP = "Geometry";
 
@@ -12,7 +15,8 @@ using ExitProc = void (CKeeperSettings::*)(QObject *);
 class CWidgetEventFilter : public QObject
 {
 public:
-    CWidgetEventFilter(CKeeperSettings *keeper, const ExitProc &exit_proc) : QObject(),
+    CWidgetEventFilter(CKeeperSettings *keeper, const ExitProc &exit_proc)
+        : QObject(),
         m_keeper(keeper),
         m_exit_proc(exit_proc) {}
     ~CWidgetEventFilter() override = default;
@@ -36,7 +40,7 @@ bool CWidgetEventFilter::eventFilter(QObject *obj, QEvent *event)
 
 // ------------------------------------------------------------------------------------------------
 // Окно будет закрываться - получено сообщение от фильтра
-void CKeeperSettings::DoExit(QObject *obj)
+void CKeeperSettings::doExit(QObject *obj)
 {
     auto widget = qobject_cast<QWidget *>(obj);
     beginGroup(GEOMETRY_GROUP);
@@ -46,11 +50,11 @@ void CKeeperSettings::DoExit(QObject *obj)
 
 // ------------------------------------------------------------------------------------------------
 // Зарегистрировать окно как желающего сохранять свой размер
-void CKeeperSettings::RegisterGeometry(QWidget *widget)
+void CKeeperSettings::registerGeometry(QWidget *widget)
 {
     // Окну установим фильтр событий и передадим указатель на метод, который
     // будет вызван, если оно попробует закрыться
-    widget->installEventFilter(new CWidgetEventFilter(this, &CKeeperSettings::DoExit));
+    widget->installEventFilter(new CWidgetEventFilter(this, &CKeeperSettings::doExit));
 
     // Прочитаем состояние геометрии окна
     beginGroup(GEOMETRY_GROUP);

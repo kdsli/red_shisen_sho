@@ -17,7 +17,7 @@ CRecordsDialog::CRecordsDialog(QWidget *parent) : QDialog(parent),
 {
     ui->setupUi(this);
 
-    settings->RegisterGeometry(this);
+    settings->registerGeometry(this);
 
     m_tabbar->setShape(QTabBar::RoundedWest);
 

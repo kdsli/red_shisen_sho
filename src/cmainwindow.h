@@ -3,9 +3,10 @@
 
 #include "cboard.h"
 
-#include <QMainWindow>
 #include "coptionsdialog.h"
 #include "crecordsdialog.h"
+
+#include <QMainWindow>
 
 namespace Ui {
 class CMainWindow;
@@ -24,6 +25,8 @@ private:
     CBoard*m_board;
     COptionsDialog *m_options_dialog;
     CRecordsDialog *m_record_dialog;
+
+    void createBoard();
 
 private slots:
     void slotOptions();

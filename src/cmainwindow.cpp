@@ -12,6 +12,8 @@
 #include <QPushButton>
 #include <QKeyEvent>
 
+#include <QDebug>
+
 CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     ui(new Ui::CMainWindow),
     m_board(nullptr),
@@ -20,21 +22,37 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 {
     ui->setupUi(this);
 
-    settings->RegisterGeometry(this);
+    settings->registerGeometry(this);
 
     // Инициализация менеджеров костяшек, фонов, рекордов
     tiles_manager = new CTilesManager(this);
     bg_manager = new CBackgroundManager(this);
     records_manager = new CRecordsManager(this);
 
-    // Доска отображения игры
-    m_board = new CBoard(this);
-    setCentralWidget(m_board);
-
     connect(ui->acExit, &QAction::triggered, this, &CMainWindow::close);
     connect(ui->acOptions, &QAction::triggered, this, &CMainWindow::slotOptions);
     connect(ui->acRecords, &QAction::triggered, this, &CMainWindow::slotRecords);
     connect(ui->acAbout, &QAction::triggered, this, &CMainWindow::slotAbout);
+
+    ui->acUndo->setEnabled(false);
+    ui->acRedo->setEnabled(false);
+
+    slotTrainingChange();
+
+    createBoard();
+}
+
+CMainWindow::~CMainWindow()
+{
+    delete ui;
+}
+
+void CMainWindow::createBoard()
+{
+    m_board = new CBoard(this);
+    setCentralWidget(m_board);
+
+    m_board->createScene();
 
     connect(ui->acNewGame, &QAction::triggered, m_board, &CBoard::slotNewGame);
     connect(ui->acRepeat, &QAction::triggered, m_board, &CBoard::slotRepeatGame);
@@ -47,17 +65,6 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
     connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
     connect(m_board, &CBoard::signalShowResult, this, &CMainWindow::slotShowResults);
-
-    ui->acUndo->setEnabled(false);
-    ui->acRedo->setEnabled(false);
-
-    slotTrainingChange();
-
-}
-
-CMainWindow::~CMainWindow()
-{
-    delete ui;
 }
 
 void CMainWindow::slotOptions()

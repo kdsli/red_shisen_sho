@@ -15,7 +15,7 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    settings->RegisterGeometry(this);
+    settings->registerGeometry(this);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &COptionsDialog::slotAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &COptionsDialog::reject);
