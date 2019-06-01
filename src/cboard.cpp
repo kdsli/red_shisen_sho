@@ -2,13 +2,23 @@
 
 #include "csettings.h"
 #include "cbackgroundmanager.h"
+#include "ctilesmanager.h"
+
+#include <QResizeEvent>
+//#include <QtOpenGL/QGLWidget>
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
     m_scene(new CScene(m_field, this))
 {
+    setFrameStyle(QFrame::NoFrame);
+
     setScene(m_scene);
     m_scene->setBackground(bg_manager->currentFile());
+
+    setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // Заполним массив типов полей
     m_field_types.insert(fz14x6, {14, 6, 4});
@@ -36,6 +46,8 @@ void CBoard::slotNewGame()
 
     // Заполним сцену новыми значениями
     m_scene->newGame();
+
+    recalcScene();
 }
 
 void CBoard::slotRepeatGame()
@@ -60,10 +72,25 @@ void CBoard::slotNewTypeGame()
 
 void CBoard::slotSetTileset()
 {
-
+    tiles_manager->initCurrentFile();
+    slotNewGame();
 }
 
 void CBoard::slotSetBackground()
 {
     m_scene->setBackground(bg_manager->currentFile());
+}
+
+void CBoard::resizeEvent(QResizeEvent *)
+{
+    recalcScene();
+}
+
+void CBoard::recalcScene()
+{
+    auto rect = m_scene->itemsBoundingRect();
+    rect.setWidth(rect.width() * 1.1);
+    rect.setHeight(rect.height() * 1.1);
+
+    fitInView(rect, Qt::KeepAspectRatio);
 }

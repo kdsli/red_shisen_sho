@@ -9,10 +9,12 @@
 #include <QSvgRenderer>
 #include <QGraphicsSvgItem>
 
+#include "debug.h"
+
 CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
     m_field(field)
 {
-
+    initDebug(0, 0);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -69,23 +71,39 @@ void CScene::newGame()
             item_tile->setPos(point);
             addItem(item_tile);
 
-            point.setX(point.x() + tiles_manager->tile_size().width());
+            point.setX(point.x() + tiles_manager->tileSize().width());
         }
         point.setX(0);
-        point.setY(point.y() + tiles_manager->tile_size().height());
+        point.setY(point.y() + tiles_manager->tileSize().height());
     }
+
+//    auto rect = QRectF(0, 0,
+//                       tiles_manager->tileSize().width() * m_field->x() * 1.1,
+//                       tiles_manager->tileSize().height() * m_field->y() * 1.1);
+
+//    setSceneRect(rect);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Отобразить фоновое изображение
 void CScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+    printVariable<QRectF>("drawBackground", rect);
     painter->drawPixmap(rect, m_bg_pixmap, m_bg_pixmap.rect());
+}
+
+// Временно
+QTextStream& operator<<(QTextStream& stream, const QRectF& rect) {
+    stream << "TopLeft (" << rect.left() << ", " << rect.y() << ") Size (" << rect.width() << ", " << rect.height() << ")";
+    return stream;
 }
 
 // ------------------------------------------------------------------------------------------------
 void CScene::drawForeground(QPainter *painter, const QRectF &rect)
 {
-//    painter->drawLine(rect.topLeft(), rect.bottomRight());
-//    QGraphicsScene::drawForeground(painter, rect);
+    auto r = sceneRect();
+    QPen pen(Qt::red);
+    pen.setWidth(3);
+    painter->setPen(pen);
+    painter->drawLine(r.topLeft(), r.bottomRight());
 }

@@ -27,6 +27,8 @@ public:
     QString currentFile();
     // Индекс текущего файла в списке файлов
     int currentIndex();
+    // Иницилизировать файл с костяшками
+    void initCurrentFile();
 
     // Renderer текущего файла
     QSvgRenderer *currentRenderer() const { return m_renderer; }
@@ -35,8 +37,8 @@ public:
     const QStringList &tilesNames() const { return m_tiles_names; }
 
     // Исходная ширина и высота костяшек
-    const QSizeF base_size() const { return m_base_size; }
-    const QSizeF tile_size() const { return m_tile_size; }
+    const QSizeF baseSize() const { return m_base_size; }
+    const QSizeF tileSize() const { return m_tile_size; }
 
 signals:
     void signalChangeTilesets();
@@ -55,7 +57,6 @@ private:
     void addTileSeries(const QString &series_name, int count);
 
     void initFiles();
-    void initCurrentFile();
     void loadSvg(const QString &);
 
     // См. комментарий с ctilesmanager.cpp

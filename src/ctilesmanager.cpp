@@ -139,7 +139,7 @@ void CTilesManager::loadSvg(const QString &file_name)
     svg->setSharedRenderer(renderer);
 
     // Рисуем tile Image
-    QImage img_tile(::tile_size, QImage::Format_ARGB32_Premultiplied);
+    QImage img_tile(tile_size, QImage::Format_ARGB32_Premultiplied);
     img_tile.fill(0);
     QPainter painter_tile(&img_tile);
     painter_tile.setRenderHint(QPainter::Antialiasing);
@@ -147,13 +147,14 @@ void CTilesManager::loadSvg(const QString &file_name)
     painter_tile.end();
 
     // Рисуем base Image
-    QImage img(::base_size, QImage::Format_ARGB32_Premultiplied);
+    QImage img(base_size, QImage::Format_ARGB32_Premultiplied);
     img.fill(0);
     QPainter painter(&img);
     painter.setRenderHint(QPainter::Antialiasing);
     renderer->render(&painter, "TILE_2");
+
     // И сверху костяшку
-    auto tile_rect = QRectF(QPointF(0, 0), ::tile_size);
+    auto tile_rect = QRectF(QPointF(0, 0), tile_size);
     painter.drawImage(tile_rect, img_tile, tile_rect);
     painter.end();
 

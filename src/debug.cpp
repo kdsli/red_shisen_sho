@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QPoint>
 #include <QMap>
+
 #include <QDebug>
 
 static int m_x;
@@ -99,3 +100,4 @@ void printStringList(const QStringList &list)
         ts <<  item << endl;
     }
 }
+

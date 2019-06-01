@@ -13,7 +13,7 @@ function(getVersion version date)
             message("Error determining application version!!!")
         else()
             string(STRIP ${PROJECT_VERSION} PROJECT_VERSION)
-            string(REGEX MATCH "[0-9]*.[0-9]*.[0-9]*-[0-9]*" PROJECT_VERSION ${PROJECT_VERSION})
+            string(REGEX MATCH "[0-9.-]*" PROJECT_VERSION ${PROJECT_VERSION})
         endif()
 
         execute_process(COMMAND ${GIT_EXECUTABLE} show -s --format=%ci

@@ -3,6 +3,7 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Svg CONFIG REQUIRED)
 find_package(Qt5LinguistTools CONFIG REQUIRED)
+#find_package(Qt5OpenGL REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

@@ -51,12 +51,17 @@ public slots:
     void slotSetTileset();
     void slotSetBackground();
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
     GameState m_game_state;
     CField *m_field;
     CScene *m_scene;
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
+
+    void recalcScene();
 
 };
 
