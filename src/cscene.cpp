@@ -7,7 +7,6 @@
 
 #include <QFileInfo>
 #include <QSvgRenderer>
-#include <QGraphicsSvgItem>
 
 #include <QDebug>
 
@@ -51,6 +50,8 @@ void CScene::setBackground(const QString &file_name)
 void CScene::newGame()
 {
     clear();
+    m_tiles_list.clear();
+    m_bases_list.clear();
 
     QPointF point(0, 0);
     int n = 0;
@@ -63,18 +64,22 @@ void CScene::newGame()
             item_base->setElementId("TILE_2");
             item_base->setPos(point);
             addItem(item_base);
+            m_bases_list.append(item_base);
 
             auto item_tile = new QGraphicsSvgItem;
             item_tile->setSharedRenderer(tiles_manager->currentRenderer());
             item_tile->setElementId(tiles_manager->tilesNames()[m_field->tiles()[n++]]);
             item_tile->setPos(point);
             addItem(item_tile);
+            m_tiles_list.append(item_tile);
 
             point.setX(point.x() + tiles_manager->tileSize().width());
         }
         point.setX(0);
         point.setY(point.y() + tiles_manager->tileSize().height());
     }
+
+    // Координаты ниже - в логических единицах
 
     // Реальная ширина/высота поля с учетом дополнительного фон
     auto w = tiles_manager->tileSize().width() * m_field->x() +
@@ -86,11 +91,43 @@ void CScene::newGame()
     // Это и есть размер поля
     setSceneRect(rect);
 
-    // m_field_rect - это поле с границами, т.е. то, что должно входить в экран
-    // при масштабировании. Больше поля на 10%
+    // m_field_rect - это поле плюс margins, т.е. то, что должно входить в экран
+    // при масштабировании. Больше SceneRect на 10%
     m_field_rect = rect;
     m_field_rect.setWidth(m_field_rect.width() * 1.1);
     m_field_rect.setHeight(m_field_rect.height() * 1.1);
+
+    // Рассчитаем прямоугольник сообщения
+    m_message_rect = QRectF(0, 0, m_field_rect.width() * 0.6, m_field_rect.height() * 0.6);
+    // Центрируем прямоугольник
+    m_message_rect.moveCenter(QPointF(width() / 2, height() / 2));
+    // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
+    m_message_font_pixel = static_cast<int>(m_message_rect.height() * 0.07);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Выделить или не выделить плитку
+void CScene::selectTile(int x, int y, bool selected)
+{
+    m_bases_list[m_field->getIndex(x, y)]->setElementId(QString("TILE_2") + (selected ? "_SEL" : ""));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Показать сообщение
+void CScene::showMessage(const QString &message, bool is_hide_tiles)
+{
+    // Скрыть все плитки
+    if (is_hide_tiles) setTilesVisible(false);
+    // Вывести сообщение
+    m_message = message;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Скрыть сообщение
+void CScene::hideMessage(bool is_show_tiles)
+{
+    if (is_show_tiles) setTilesVisible(true);
+    m_message.clear();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -101,11 +138,37 @@ void CScene::drawBackground(QPainter *painter, const QRectF &rect)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CScene::drawForeground(QPainter *, const QRectF &)
+// Вывод после отображения фона и всех костяшек
+void CScene::drawForeground(QPainter *painter, const QRectF &)
 {
-//    auto r = sceneRect();
-//    QPen pen(Qt::red);
-//    pen.setWidth(3);
-//    painter->setPen(pen);
-//    painter->drawLine(r.topLeft(), r.bottomRight());
+    if (!m_message.isEmpty())
+        paintMessage(painter);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Показать/скрыть все плитки
+void CScene::setTilesVisible(bool visible)
+{
+    for (auto base : m_bases_list) base->setVisible(visible);
+    for (auto tile : m_tiles_list) tile->setVisible(visible);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CScene::paintMessage(QPainter *painter)
+{
+    QPen pen(Qt::black);
+    pen.setWidth(1);
+    pen.setColor(Qt::white);
+    painter->setPen(pen);
+    painter->setBrush(QColor::fromRgb(50, 50, 50, 150));
+    painter->drawRoundedRect(m_message_rect, 10, 10);
+
+    QFont font;
+    font.setPixelSize(m_message_font_pixel);
+    painter->setFont(font);
+
+    QTextOption to;
+    to.setAlignment(Qt::AlignCenter);
+
+    painter->drawText(m_message_rect, m_message, to);
 }

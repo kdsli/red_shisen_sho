@@ -55,16 +55,24 @@ public slots:
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     GameState m_game_state;
+    GameState m_prev_pause_state;
     CField *m_field;
     CScene *m_scene;
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
+    // Признак того, что отображается путь
+    bool m_is_path;
 
-    void recalcScene();
+    // Пересчитать view (вызвается при инициализации и каждом изменении размера)
+    void recalcView();
 
+    // Обработчики мыши
+    void clickLeftButton(QMouseEvent *);
+    void clickRightButton(QMouseEvent *);
 };
 
 #endif // CBOARD_H

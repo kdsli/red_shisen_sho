@@ -14,7 +14,8 @@
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
-    m_scene(nullptr)
+    m_scene(nullptr),
+    m_is_path(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_NoSystemBackground);
@@ -63,46 +64,109 @@ void CBoard::slotNewGame()
     // Заполним сцену новыми значениями
     m_scene->newGame();
 
-    recalcScene();
+    recalcView();
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::slotRepeatGame()
 {
 
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::slotHelp()
 {
 
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::slotPause()
 {
-
+    if (m_game_state != gsPause) {
+        m_scene->showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
+        m_prev_pause_state = m_game_state;
+        m_game_state = gsPause;
+    } else {
+        m_scene->hideMessage(true);
+        m_game_state = m_prev_pause_state;
+    }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Изменился тип игры
 void CBoard::slotNewTypeGame()
 {
     slotNewGame();
 }
 
+// ------------------------------------------------------------------------------------------------
+// Изменился тип костяшек
 void CBoard::slotSetTileset()
 {
     tiles_manager->initCurrentFile();
-    slotNewGame();
 }
 
+// ------------------------------------------------------------------------------------------------
+// Установить новый фон
 void CBoard::slotSetBackground()
 {
     m_scene->setBackground(bg_manager->currentFile());
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::resizeEvent(QResizeEvent *)
 {
-    recalcScene();
+    recalcView();
 }
 
-void CBoard::recalcScene()
+// ------------------------------------------------------------------------------------------------
+// Нажатие на кнопки мыши
+void CBoard::mousePressEvent(QMouseEvent *event)
+{
+    // Пока удаляются костяшки игнорируем мышь
+     if (m_is_path) {
+         event->accept();
+         return;
+     }
+     if (event->buttons().testFlag(Qt::LeftButton))
+         clickLeftButton(event);
+     if (event->buttons().testFlag(Qt::RightButton) && settings->isTraining())
+         clickRightButton(event);
+ }
+
+// ------------------------------------------------------------------------------------------------
+// Пересчитать view (вызвается при инициализации и каждом изменении размера)
+void CBoard::recalcView()
 {
     fitInView(m_scene->fieldRect(), Qt::KeepAspectRatio);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::clickLeftButton(QMouseEvent *)
+{
+    switch (m_game_state) {
+    case gsNormal:
+//        m_field->mouseLeft(getTileIndex(event->pos()));
+        break;
+    case gsPause:
+        slotPause();
+        break;
+    case gsDemostration:
+//        closeDemonstration();
+        break;
+    case gsNotVariants:
+//        startDemonstration();
+        break;
+    case gsVictory:
+//        checkResult();
+        break;
+    case gsEmpty:
+        break;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::clickRightButton(QMouseEvent *)
+{
+
 }

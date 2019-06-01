@@ -14,12 +14,17 @@ class CField : public QObject
 public:
     explicit CField(QObject *parent = nullptr);
 
-    const Field &tiles() const { return m_tiles; }
+    // Размеры поля
     int x() const { return m_x; }
     int y() const { return m_y; }
 
-    void newGame(int x, int y, int count_in_type);
+    // Поле
+    const Field &tiles() const { return m_tiles; }
 
+    // Получить индекс в массиве m_tiles по координатам
+    int getIndex(int x, int y) const;
+
+    void newGame(int x, int y, int count_in_type);
 
 private:
     // Размеры поля
