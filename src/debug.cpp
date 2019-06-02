@@ -101,3 +101,32 @@ QTextStream& operator<<(QTextStream& stream, const QRectF& rect) {
     stream << "TopLeft (" << rect.left() << ", " << rect.y() << ") Size (" << rect.width() << ", " << rect.height() << ")";
     return stream;
 }
+
+void dumpZValues(const QString &message, const QVector<QGraphicsSvgItem *> &vector, int _x, int _y)
+{
+    QFile file("dump.txt");
+    file.open(QIODevice::Append);
+    QTextStream ts(&file);
+    ts.setFieldWidth(3);
+    ts.setPadChar(' ');
+
+    ts << message << endl << endl;
+
+    ts << "     ";
+    for (int i = 0; i < _x; ++i) {
+        ts << i << " ";
+    }
+    ts << endl;
+
+    int n = 0;
+    for (int y = 0; y < _y; ++y) {
+        ts << y << "  ";
+        for (int x = 0; x < _x; ++x) {
+            ts << (vector[n] ? vector[n]->zValue() : -1) << " ";
+            ++n;
+        }
+        ts << endl;
+    }
+    ts << endl;
+
+}

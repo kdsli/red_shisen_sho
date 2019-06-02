@@ -35,7 +35,7 @@ private slots:
     void slotTrainingChange();
     void slotSetLanguage();
     void slotRecords();
-    void slotShowResults(int);
+    void slotShowResults(int index);
     void slotAbout();
 };
 

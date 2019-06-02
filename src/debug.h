@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QRectF>
+#include <QGraphicsSvgItem>
 
 void initDebug();
 void PrintDump(const QString &title, QVector<int> &field, int x, int y, int current_count);
@@ -13,6 +14,8 @@ void PrintDump(const QString &title, QVector<int> &field, int x, int y, int curr
 void CheckField(const QVector<int> &, int);
 
 void printStringList(const QStringList &);
+
+void dumpZValues(const QString &message, const QVector<QGraphicsSvgItem *> &vector, int _x, int _y);
 
 template <typename T>
 void printVariable(const QString &text, T t)

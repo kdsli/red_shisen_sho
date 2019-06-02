@@ -5,11 +5,8 @@
 
 #include <random>
 
-#include "debug.h"
-
 CField::CField(QObject *parent) : QObject(parent)
 {
-    initDebug();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -20,6 +17,7 @@ void CField::newGame(int x, int y, int count)
     m_y = y;
     m_count_in_type = count;
     m_tiles_count = m_x * m_y;
+    m_current_count = m_tiles_count;
 
     m_tiles.resize(m_tiles_count);
     m_tiles.fill(-1);
@@ -44,14 +42,36 @@ void CField::newGame(int x, int y, int count)
         }
     }
 
-    PrintDump("До перемешивания", m_tiles, m_x, m_y, 0);
-
     if (settings->isDecision()) {
         // Перемешать так, чтобы набор костяшек потенциально можно решить
         shuffleDecisionVariant();
     }
 
-    PrintDump("После перемешивания", m_tiles, m_x, m_y, 0);
+    // Найдем первый вариант
+    checkVariants(m_tiles, m_hint);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Соединим две ячейки (если возможно)
+void CField::Connect(const TilePair &tiles)
+{
+    if (!checkConnect(m_tiles, tiles)) return;
+
+    // Снимем костяшки
+    clearTiles(m_tiles, tiles);
+    m_current_count -= 2;
+    // Соединить можно, в m_path лежит путь для отображения - сказать
+    emit signalStartConnect(tiles);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Проверка состояния игры (есть ли дальше варианты, достигнута ли победа)
+VariantStatus CField::getGameStatus()
+{
+    if (m_current_count == 0) return vsVictory;
+    if (!checkVariants(m_tiles, m_hint)) return vsNotVariant;
+
+    return vsNormal;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -136,10 +156,6 @@ void CField::shuffleDecisionVariant()
             }
         }
 
-        PrintDump("Тупик field", field, m_x, m_y, current_count);
-        PrintDump("Тупик parrent", pattern, m_x, m_y, current_count);
-        PrintDump("Тупик collation", collation, m_x, m_y, current_count);
-
         // Существует ситуация, когда перемешивание не дает ничего
         // Это наблюдается когда остается 4 костяшки по диагонали и std::shiffle
         // их не перемешивает. Просто поменяем две оставлшиеся ячейки местами.
@@ -206,7 +222,7 @@ bool CField::checkVariants(const Field &field, TilePair &tiles)
     shuffleField(v);
 
     // Идем по m_field и для каждой костяшки будем проверять возможность
-    // соединения со всеми костяшками данного типа, лажащих после текущей
+    // соединения со всеми костяшками данного типа, лежащих после текущей
     for (auto k = 0; k < m_tiles_count; ++k) {
         // Костяшку с индексом i будет пытаться соеденить с другими этого же типа
         auto i = v[k];

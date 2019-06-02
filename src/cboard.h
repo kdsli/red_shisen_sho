@@ -40,14 +40,14 @@ public:
 signals:
     void signalUpdateInfo();
     void signalUndoRedo(bool, bool);
-    void signalShowResult(int);
     void signalUndo();
     void signalRedo();
+    void signalShowResult(int);
 
 public slots:
     void slotNewGame();
     void slotRepeatGame();
-    void slotHelp();
+    void slotHint();
     void slotPause();
     void slotNewTypeGame();
     void slotSetTileset();
@@ -73,6 +73,17 @@ private:
     // Обработчики мыши
     void clickLeftButton(QMouseEvent *);
     void clickRightButton(QMouseEvent *);
+
+    // Ситуации в игре
+    void doVictory();
+    void doNotVariant();
+
+    // Проверить и показать результаты
+    void checkResult();
+
+private slots:
+    void slotRepaintPath();
+    void slotVariantStatus(VariantStatus);
 };
 
 #endif // CBOARD_H

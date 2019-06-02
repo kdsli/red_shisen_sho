@@ -18,4 +18,10 @@ using TilePairList = QVector<TilePair>;
 using UndoItem = std::tuple<Tile, Tile, int>;
 using UndoList = QVector<UndoItem>;
 
+// Список координат сцены. Используется для определения координат пути
+using CoordList = QVector<QPointF>;
+
+// Состояние игры после текущей итерации
+enum VariantStatus {vsNormal, vsNotVariant, vsVictory};
+
 #endif // COMMON_TYPES_H

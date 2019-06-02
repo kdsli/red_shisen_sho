@@ -56,7 +56,7 @@ void CMainWindow::createBoard()
 
     connect(ui->acNewGame, &QAction::triggered, m_board, &CBoard::slotNewGame);
     connect(ui->acRepeat, &QAction::triggered, m_board, &CBoard::slotRepeatGame);
-    connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHelp);
+    connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHint);
     connect(ui->acPause, &QAction::triggered, m_board, &CBoard::slotPause);
 
     connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::signalUndo);

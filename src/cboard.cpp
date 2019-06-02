@@ -3,6 +3,7 @@
 #include "csettings.h"
 #include "cbackgroundmanager.h"
 #include "ctilesmanager.h"
+#include "crecordsmanager.h"
 
 #ifdef DEFINED_OPENGL
 #include <QtOpenGL/QGLWidget>
@@ -45,6 +46,9 @@ void CBoard::createScene()
     m_scene->setBackground(bg_manager->currentFile());
     setScene(m_scene);
 
+    connect(m_scene, &CScene::signalPaintPath, this, &CBoard::slotRepaintPath);
+    connect(m_scene, &CScene::signalVariantStatus, this, &CBoard::slotVariantStatus);
+
     slotNewGame();
 }
 
@@ -53,6 +57,7 @@ QString CBoard::gameInfo()
     return "";
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::slotNewGame()
 {
     m_game_state = gsNormal;
@@ -70,13 +75,12 @@ void CBoard::slotNewGame()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotRepeatGame()
 {
-
 }
 
 // ------------------------------------------------------------------------------------------------
-void CBoard::slotHelp()
+void CBoard::slotHint()
 {
-
+    // Показать hint
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -158,7 +162,7 @@ void CBoard::clickLeftButton(QMouseEvent *event)
 //        startDemonstration();
         break;
     case gsVictory:
-//        checkResult();
+        checkResult();
         break;
     case gsEmpty:
         break;
@@ -171,3 +175,67 @@ void CBoard::clickRightButton(QMouseEvent *event)
     // Отдадим нажатие сцене
     if (settings->isTraining()) m_scene->mouseRight(mapToScene(event->pos()));
 }
+
+// ------------------------------------------------------------------------------------------------
+// Отобразить путь
+void CBoard::slotRepaintPath()
+{
+    if (m_scene->pathCoords().isEmpty()) return;
+
+    QRegion region;
+
+    auto prev_coord = mapFromScene(m_scene->pathCoords()[0]);
+    for (int i = 1; i < m_scene->pathCoords().size(); ++i) {
+        auto coord = mapFromScene(m_scene->pathCoords()[1]);
+        auto rect = QRectF(prev_coord, coord).normalized();
+        rect.adjust(-1, -1, 1, 1);
+        region += rect.toRect();
+        prev_coord = coord;
+    }
+    viewport()->repaint(region);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Поле показало, какие у него варианты
+// Получаются только vsVictory и vsNotVariant
+void CBoard::slotVariantStatus(VariantStatus status)
+{
+    if (status == vsVictory)
+        doVictory();
+    if (status == vsNotVariant)
+        doNotVariant();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Победа!
+void CBoard::doVictory()
+{
+    m_game_state = gsVictory;
+    m_scene->showMessage(tr("Вы выиграли!"));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Поражение
+void CBoard::doNotVariant()
+{
+    m_game_state = gsNotVariants;
+
+    QString s = tr("Игра зашла в тупик.") + "\n";
+    if (settings->isDecision())
+        s += tr("А вариант был - посмотрите демонстрацию.") + "\n";
+    m_scene->showMessage(s + tr("Щелкните для продолжения..."));
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::checkResult()
+{
+    m_game_state = gsEmpty;
+    m_scene->hideMessage(false);
+
+//    auto result = records_manager->checkRecord(m_second);
+    auto result = 1;
+
+    if (result != -1)
+        emit signalShowResult(result);
+}
+

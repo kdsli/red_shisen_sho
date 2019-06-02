@@ -7,12 +7,15 @@
 
 #include <QFileInfo>
 #include <QSvgRenderer>
+#include <QTimerEvent>
 
 #include <QDebug>
+
 
 CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
     m_field(field)
 {
+    connect(m_field, &CField::signalStartConnect, this, &CScene::slotStartConnect);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -51,7 +54,6 @@ void CScene::newGame()
 {
     clear();
     m_tiles_list.clear();
-    m_bases_list.clear();
     m_selected.clear();
 
     QPointF point(0, 0);
@@ -64,15 +66,14 @@ void CScene::newGame()
             item_base->setSharedRenderer(tiles_manager->currentRenderer());
             item_base->setElementId(tiles_manager->getBaseName());
             item_base->setPos(point);
-            addItem(item_base);
-            m_bases_list.append(item_base);
+            item_base->setZValue(n);
 
-            auto item_tile = new QGraphicsSvgItem;
+            auto item_tile = new QGraphicsSvgItem(item_base);
             item_tile->setSharedRenderer(tiles_manager->currentRenderer());
             item_tile->setElementId(tiles_manager->tilesNames()[m_field->tiles()[n++]]);
-            item_tile->setPos(point);
-            addItem(item_tile);
-            m_tiles_list.append(item_tile);
+
+            addItem(item_base);
+            m_tiles_list.append(item_base);
 
             point.setX(point.x() + tiles_manager->tileSize().width());
         }
@@ -82,7 +83,7 @@ void CScene::newGame()
 
     // Координаты ниже - в логических единицах
 
-    // Реальная ширина/высота поля с учетом дополнительного фон
+    // Реальная ширина/высота поля с учетом тени последних костяшек
     auto w = tiles_manager->tileSize().width() * m_field->x() +
             (tiles_manager->baseSize().width() - tiles_manager->tileSize().width());
     auto h = tiles_manager->tileSize().height() * m_field->y() +
@@ -110,7 +111,7 @@ void CScene::newGame()
 // Выделить или не выделить плитку
 void CScene::selectTile(int x, int y, bool selected) const
 {
-    m_bases_list[m_field->getIndex(x, y)]->setElementId(
+    m_tiles_list[m_field->getIndex(x, y)]->setElementId(
         selected ? tiles_manager->getSelectedBaseName() : tiles_manager->getBaseName()
     );
 }
@@ -142,6 +143,9 @@ void CScene::hideMessage(bool is_show_tiles)
 // Нажата левая клавиша мыши
 void CScene::mouseLeft(QPointF point)
 {
+    // Если перерисовывается путь - мышь недоступна
+    if (m_is_path) return;
+
     // Получим костяшку по координатам
     auto tile = getTileIndex(point);
 
@@ -165,7 +169,7 @@ void CScene::mouseLeft(QPointF point)
                     // Проверить, совпадает ли тип
                     if (m_field->getTileType(tile) == m_field->getTileType(m_selected.front())) {
                         // Пробуем соединить между собой
-//                        Connect(TilePair(m_selected.front(), tile));
+                        m_field->Connect(TilePair(m_selected.front(), tile));
                     } else {
                         // Тип не совпадает, кликнута на другую костяшку
                         // Убрать выделение
@@ -206,13 +210,46 @@ void CScene::drawForeground(QPainter *painter, const QRectF &)
 {
     if (!m_message.isEmpty())
         paintMessage(painter);
+    if (m_is_path)
+        paintPath(painter);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Сработал таймер
+void CScene::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_path_timer) {
+        doTimerPath();
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Вернуть левый верхний угол ячейки
+const QPointF CScene::getTilePos(const Tile &tile) const
+{
+    return QPointF(tile.x() * tiles_manager->tileSize().width(),
+                   tile.y() * tiles_manager->tileSize().height());
+}
+
+const QPointF CScene::getTilePos(const int index) const
+{
+    return getTilePos(m_field->getTile(index));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Вернуть центр ячейки
+const QPointF CScene::getTileCenter(const Tile &tile) const
+{
+    auto x = static_cast<int>((tile.x() + 0.5) * tiles_manager->tileSize().width());
+    auto y = static_cast<int>((tile.y() + 0.5) * tiles_manager->tileSize().height());
+
+    return Tile(x, y);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Показать/скрыть все плитки
 void CScene::setTilesVisible(bool visible)
 {
-    for (auto base : m_bases_list) base->setVisible(visible);
     for (auto tile : m_tiles_list) tile->setVisible(visible);
 }
 
@@ -265,4 +302,110 @@ void CScene::addSelected(const Tile &tile)
     m_selected.append(tile);
     selectTile(tile, true);
 }
+
+// ------------------------------------------------------------------------------------------------
+// Окончание таймера пути
+void CScene::doTimerPath()
+{
+    m_field->path().clear();
+
+    killTimer(m_path_timer);
+    m_path_timer = -1;
+    m_is_path = false;
+
+    // Удалить костяшки
+    removeTiles(m_deleted_tiles);
+
+    // Сказать board'у перерисовать путь
+    emit signalPaintPath();
+    m_path_coords.clear();
+
+    // Проверим состояние программы
+    auto result = m_field->getGameStatus();
+    if (result == vsNotVariant || result == vsVictory)
+        emit signalVariantStatus(result);
+
+    // Статусная строка
+    //    emit signalUpdateInfo();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нарисовать путь
+void CScene::paintPath(QPainter *painter)
+{
+    QPen pen(Qt::red);
+    // Толщина линии в 10% от высоты костяшки
+    pen.setWidth(static_cast<int>(tiles_manager->tileSize().height() / 10));
+    pen.setCapStyle(Qt::RoundCap);
+
+    painter->setPen(pen);
+    for (int i = 0; i < m_path_coords.size() - 1; ++i)
+        painter->drawLine(m_path_coords[i], m_path_coords[i + 1]);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Поле сказало, что нужно удалить костяшки
+void CScene::slotStartConnect(const TilePair &tiles)
+{
+    m_selected.clear();
+
+    // Сохраним костяшки и запустим таймер
+    m_deleted_tiles = tiles;
+    m_is_path = true;
+    m_path_timer = startTimer(settings->timeDelay());
+
+    m_path_coords.clear();
+    // Сформируем список Rect в координатах сцены, которые нужно перерисовать
+    for (int i = 0; i < m_field->path().size(); ++i)
+        m_path_coords.append(getTileCenter(m_field->path()[i]));
+
+    // Сказать board'у перерисовать путь
+    emit signalPaintPath();
+
+}
+
+// ------------------------------------------------------------------------------------------------
+// Снять костяшки
+void CScene::removeTiles(const TilePair &tiles)
+{
+    auto index = m_field->getIndex(tiles.first);
+    removeItem(m_tiles_list[index]);
+    m_tiles_list[index] = nullptr;
+    index = m_field->getIndex(tiles.second);
+    removeItem(m_tiles_list[index]);
+    m_tiles_list[index] = nullptr;
+
+    if (!settings->isGravity()) return;
+
+    // Отдельный случай - если костяшки лежат друг над другом по вертикали
+    if (tiles.first.x() == tiles.second.x()) {
+        // Просто сдвинуть колонку начиная с верхней
+        columnMoveDown(tiles.first.y() < tiles.second.y() ? tiles.first : tiles.second);
+        columnMoveDown(tiles.first.y() < tiles.second.y() ? tiles.second : tiles.first);
+    } else {
+        // Снять обычным образом
+        columnMoveDown(tiles.first);
+        columnMoveDown(tiles.second);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Сдвинуть колонку вниз
+void CScene::columnMoveDown(const Tile &tile)
+{
+    auto index = m_field->getIndex(tile);
+    forever {
+        auto up_index = index - m_field->x();
+        // Смещаем
+        if (up_index < 0 || !m_tiles_list[up_index]) break;
+        // Переместим позицию и ZValue
+        m_tiles_list[up_index]->setPos(getTilePos(index));
+        m_tiles_list[up_index]->setZValue(index);
+        // Изменение в поле
+        m_tiles_list[index] = m_tiles_list[up_index];
+        m_tiles_list[up_index] = nullptr;
+        index -= m_field->x();
+    }
+}
+
 

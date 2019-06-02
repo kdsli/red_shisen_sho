@@ -19,7 +19,10 @@ public:
     int y() const { return m_y; }
     int tilesCount() const { return m_tiles_count; }
 
-    // Координаты в поле
+    // Найденный путь снятия костяшек
+    TileList &path() { return m_path; }
+
+    // Поле
     const Field &tiles() const { return m_tiles; }
     // Получить индекс в массиве Field по координатам
     int getIndex(int x, int y) const;
@@ -34,11 +37,23 @@ public:
     // Новая игра
     void newGame(int x, int y, int count_in_type);
 
+    // Соединим две ячейки (если возможно)
+    void Connect(const TilePair &tiles);
+
+    // Проверка состояния игры (есть ли дальше варианты, достигнута ли победа)
+    VariantStatus getGameStatus();
+
+signals:
+    // Сигнал снять костяшки и отобразить путь
+    void signalStartConnect(const TilePair &tiles);
+
 private:
     // Размеры поля
     int m_x, m_y;
     int m_count_in_type;
     int m_tiles_count;
+    // Текущее количество костяшек
+    int m_current_count;
     // Поле
     Field m_tiles;
     // Список правильных снятий, вычисленных на этапе определения вариантов
@@ -47,6 +62,8 @@ private:
     TileList m_path;
     // Список костяшек, которые должны быть удалены
     TileList m_deleted_list;
+    // Тут всегда будет подсказка
+    TilePair m_hint;
 
     // Перемешать массив
     void shuffleField(Field &tiles) const;
