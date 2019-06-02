@@ -17,11 +17,19 @@ public:
     // Размеры поля
     int x() const { return m_x; }
     int y() const { return m_y; }
+    int tilesCount() const { return m_tiles_count; }
 
-    // Поле
+    // Координаты в поле
     const Field &tiles() const { return m_tiles; }
     // Получить индекс в массиве Field по координатам
     int getIndex(int x, int y) const;
+    int getIndex(Tile tile) const;
+    // Обратная процедура - получить костяшку (координаты) по индексу
+    Tile getTile(int index) const;
+
+    // Получить тип костяшки
+    int getTileType(Tile &tile);
+    int getTileType(int index);
 
     // Новая игра
     void newGame(int x, int y, int count_in_type);
@@ -39,11 +47,6 @@ private:
     TileList m_path;
     // Список костяшек, которые должны быть удалены
     TileList m_deleted_list;
-
-    // Получить индекс в массиве m_tiles по координатам
-    int getIndex(Tile tile) const;
-    // Обратная процедура - получить костяшку (координаты) по индексу
-    Tile getTile(int index) const;
 
     // Перемешать массив
     void shuffleField(Field &tiles) const;

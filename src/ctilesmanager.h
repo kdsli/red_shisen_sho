@@ -36,9 +36,17 @@ public:
     // Массив наименований костяшек
     const QStringList &tilesNames() const { return m_tiles_names; }
 
+    // Наименование базовых костяшек
+    const QString &getBaseName() const;
+    const QString &getSelectedBaseName() const;
+
     // Исходная ширина и высота костяшек
     const QSizeF baseSize() const { return m_base_size; }
     const QSizeF tileSize() const { return m_tile_size; }
+
+    // Размеры тени
+    qreal shadowWidht() const { return m_shadow_width; }
+    qreal shadowHeight() const { return m_shadow_height; }
 
 signals:
     void signalChangeTilesets();
@@ -48,11 +56,14 @@ private:
     // Список файлов
     QVector<TilesFile> m_files;
     QFileSystemWatcher m_watcher;
+    QSvgRenderer *m_renderer;
     // Список названий костяшек
     QStringList m_tiles_names;
-    QSvgRenderer *m_renderer;
+    // Размеры костяшек
     QSizeF m_base_size;
     QSizeF m_tile_size;
+    // Ширина и высота тени костяшки
+    qreal m_shadow_width, m_shadow_height;
 
     void addTileSeries(const QString &series_name, int count);
 

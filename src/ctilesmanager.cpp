@@ -29,6 +29,8 @@ static const QString tiles_dir = "tilesets";
 static const QSize base_size = QSize(96, 116);
 static const QSize tile_size = QSize(69, 89);
 static const QStringList filters_svg{"*.svg", "*.svgz"};
+static const QString base_name = "TILE_2";
+static const QString base_selected_name = "TILE_2_SEL";
 
 // ------------------------------------------------------------------------------------------------
 CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
@@ -122,9 +124,24 @@ void CTilesManager::initCurrentFile()
     m_renderer = new QSvgRenderer(currentFile());
 
     // Базовый размер основы и костяшки
-    getTileSize("TILE_2", m_base_size);
+    getTileSize(base_name, m_base_size);
     getTileSize("CHARACTER_2", m_tile_size);
 
+    // И размеры тени
+    m_shadow_width = m_base_size.width() - m_tile_size.width();
+    m_shadow_height = m_base_size.height() - m_tile_size.height();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Названия обычной и выделенной базовой костяшки
+const QString &CTilesManager::getBaseName() const
+{
+    return base_name;
+}
+
+const QString &CTilesManager::getSelectedBaseName() const
+{
+    return base_selected_name;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,7 +168,7 @@ void CTilesManager::loadSvg(const QString &file_name)
     img.fill(0);
     QPainter painter(&img);
     painter.setRenderHint(QPainter::Antialiasing);
-    renderer->render(&painter, "TILE_2");
+    renderer->render(&painter, base_name);
 
     // И сверху костяшку
     auto tile_rect = QRectF(QPointF(0, 0), tile_size);

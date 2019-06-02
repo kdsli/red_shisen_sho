@@ -52,6 +52,7 @@ void CScene::newGame()
     clear();
     m_tiles_list.clear();
     m_bases_list.clear();
+    m_selected.clear();
 
     QPointF point(0, 0);
     int n = 0;
@@ -61,7 +62,7 @@ void CScene::newGame()
 
             auto item_base = new QGraphicsSvgItem;
             item_base->setSharedRenderer(tiles_manager->currentRenderer());
-            item_base->setElementId("TILE_2");
+            item_base->setElementId(tiles_manager->getBaseName());
             item_base->setPos(point);
             addItem(item_base);
             m_bases_list.append(item_base);
@@ -107,9 +108,16 @@ void CScene::newGame()
 
 // ------------------------------------------------------------------------------------------------
 // Выделить или не выделить плитку
-void CScene::selectTile(int x, int y, bool selected)
+void CScene::selectTile(int x, int y, bool selected) const
 {
-    m_bases_list[m_field->getIndex(x, y)]->setElementId(QString("TILE_2") + (selected ? "_SEL" : ""));
+    m_bases_list[m_field->getIndex(x, y)]->setElementId(
+        selected ? tiles_manager->getSelectedBaseName() : tiles_manager->getBaseName()
+    );
+}
+
+void CScene::selectTile(const Tile &tile, bool selected) const
+{
+    selectTile(tile.x(), tile.y(), selected);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -128,6 +136,61 @@ void CScene::hideMessage(bool is_show_tiles)
 {
     if (is_show_tiles) setTilesVisible(true);
     m_message.clear();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нажата левая клавиша мыши
+void CScene::mouseLeft(QPointF point)
+{
+    // Получим костяшку по координатам
+    auto tile = getTileIndex(point);
+
+    // Если кликнули мимо
+    if (tile.x() == -1 || m_field->getTileType(tile) == -1) {
+        clearSelected();
+    } else {
+        // Если выбранных нет - выделить ее
+        if (m_selected.isEmpty()) {
+            addSelected(tile);
+        } else {
+            // Если заявок выбрано больше одной - все очистить, нужную выделить
+            if (m_selected.size() > 1) {
+                clearSelected();
+                addSelected(tile);
+            } else {
+                // Выбрана ровно одна заявка, если она уже выделена - убрать выделение
+                if (m_selected.front() == tile) {
+                    clearSelected();
+                } else {
+                    // Проверить, совпадает ли тип
+                    if (m_field->getTileType(tile) == m_field->getTileType(m_selected.front())) {
+                        // Пробуем соединить между собой
+//                        Connect(TilePair(m_selected.front(), tile));
+                    } else {
+                        // Тип не совпадает, кликнута на другую костяшку
+                        // Убрать выделение
+                        clearSelected();
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нажата правая клавиша мыши
+void CScene::mouseRight(QPointF point)
+{
+    clearSelected();
+
+    auto tile = getTileIndex(point);
+    if (tile.x() == -1) return;
+
+    auto curr_type = m_field->getTileType(tile);
+    for (int i = 0; i < m_field->tilesCount(); ++i) {
+        if (m_field->getTileType(i) == curr_type)
+            addSelected(m_field->getTile(i));
+    }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -154,7 +217,7 @@ void CScene::setTilesVisible(bool visible)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CScene::paintMessage(QPainter *painter)
+void CScene::paintMessage(QPainter *painter) const
 {
     QPen pen(Qt::black);
     pen.setWidth(1);
@@ -172,3 +235,34 @@ void CScene::paintMessage(QPainter *painter)
 
     painter->drawText(m_message_rect, m_message, to);
 }
+
+// ------------------------------------------------------------------------------------------------
+// Рассчитать костяшку по координатам виджета
+Tile CScene::getTileIndex(const QPointF point)
+{
+    if (!sceneRect().contains(point))
+        return Tile(-1, -1);
+
+    int x = static_cast<int>(point.x() / tiles_manager->tileSize().width());
+    int y = static_cast<int>(point.y() / tiles_manager->tileSize().height());
+
+    return Tile(x, y);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Очистить выбранные костяшки
+void CScene::clearSelected()
+{
+    for (const auto &tile : m_selected) {
+        selectTile(tile, false);
+    }
+    m_selected.clear();
+}
+
+// ------------------------------------------------------------------------------------------------
+void CScene::addSelected(const Tile &tile)
+{
+    m_selected.append(tile);
+    selectTile(tile, true);
+}
+

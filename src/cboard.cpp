@@ -142,11 +142,11 @@ void CBoard::recalcView()
 }
 
 // ------------------------------------------------------------------------------------------------
-void CBoard::clickLeftButton(QMouseEvent *)
+void CBoard::clickLeftButton(QMouseEvent *event)
 {
     switch (m_game_state) {
     case gsNormal:
-//        m_field->mouseLeft(getTileIndex(event->pos()));
+        m_scene->mouseLeft(mapToScene(event->pos()));
         break;
     case gsPause:
         slotPause();
@@ -166,7 +166,8 @@ void CBoard::clickLeftButton(QMouseEvent *)
 }
 
 // ------------------------------------------------------------------------------------------------
-void CBoard::clickRightButton(QMouseEvent *)
+void CBoard::clickRightButton(QMouseEvent *event)
 {
-
+    // Отдадим нажатие сцене
+    if (settings->isTraining()) m_scene->mouseRight(mapToScene(event->pos()));
 }
