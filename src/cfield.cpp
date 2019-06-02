@@ -47,8 +47,8 @@ void CField::newGame(int x, int y, int count)
         shuffleDecisionVariant();
     }
 
-    // Найдем первый вариант
-    checkVariants(m_tiles, m_hint);
+    // Найдем первый вариант - в пути будет подсказка
+    checkVariants(m_tiles, m_hint_tiles);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -69,7 +69,9 @@ void CField::Connect(const TilePair &tiles)
 VariantStatus CField::getGameStatus()
 {
     if (m_current_count == 0) return vsVictory;
-    if (!checkVariants(m_tiles, m_hint)) return vsNotVariant;
+    if (!checkVariants(m_tiles, m_hint_tiles)) return vsNotVariant;
+
+    // В пути будет лежать подсказка, а костяшки для подсказки - в m_hint_tiles
 
     return vsNormal;
 }

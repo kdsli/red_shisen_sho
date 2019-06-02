@@ -64,8 +64,6 @@ private:
     CScene *m_scene;
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
-    // Признак того, что отображается путь
-    bool m_is_path;
 
     // Пересчитать view (вызвается при инициализации и каждом изменении размера)
     void recalcView();
@@ -80,6 +78,9 @@ private:
 
     // Проверить и показать результаты
     void checkResult();
+
+    // Начать демонстрацию
+    void startDemonstration();
 
 private slots:
     void slotRepaintPath();

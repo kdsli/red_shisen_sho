@@ -21,6 +21,8 @@ public:
 
     // Найденный путь снятия костяшек
     TileList &path() { return m_path; }
+    // Костяшки для подсказки
+    const TilePair hintTiles() const { return m_hint_tiles; }
 
     // Поле
     const Field &tiles() const { return m_tiles; }
@@ -62,8 +64,8 @@ private:
     TileList m_path;
     // Список костяшек, которые должны быть удалены
     TileList m_deleted_list;
-    // Тут всегда будет подсказка
-    TilePair m_hint;
+    // Список костяшек для подсказки
+    TilePair m_hint_tiles;
 
     // Перемешать массив
     void shuffleField(Field &tiles) const;

@@ -28,6 +28,9 @@ public:
     void showMessage(const QString &message, bool is_hide_tiles = false);
     void hideMessage(bool is_show_tiles);
 
+    // Показать hint
+    void showHint();
+
     // Обработка мыши
     void mouseLeft(QPointF point);
     void mouseRight(QPointF point);
@@ -67,7 +70,9 @@ private:
     TilePair m_deleted_tiles;
     // Признак того, что в данное время показывается путь
     bool m_is_path{false};
-    // Список текущего патча в координатах сцены
+    // Признак того, что в данное время показывается подсказка
+    bool m_is_hint{false};
+    // Список текущего пути в координатах сцены
     CoordList m_path_coords;
 
     // Вернуть левый верхний угол ячейки

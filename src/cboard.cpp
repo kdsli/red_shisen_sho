@@ -15,8 +15,7 @@
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
-    m_scene(nullptr),
-    m_is_path(false)
+    m_scene(nullptr)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_NoSystemBackground);
@@ -80,7 +79,8 @@ void CBoard::slotRepeatGame()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotHint()
 {
-    // Показать hint
+    // Скажем сцене поместить в путь
+    m_scene->showHint();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -127,11 +127,6 @@ void CBoard::resizeEvent(QResizeEvent *)
 // Нажатие на кнопки мыши
 void CBoard::mousePressEvent(QMouseEvent *event)
 {
-    // Пока удаляются костяшки игнорируем мышь
-     if (m_is_path) {
-         event->accept();
-         return;
-     }
      if (event->buttons().testFlag(Qt::LeftButton))
          clickLeftButton(event);
      if (event->buttons().testFlag(Qt::RightButton) && settings->isTraining())
@@ -159,7 +154,7 @@ void CBoard::clickLeftButton(QMouseEvent *event)
 //        closeDemonstration();
         break;
     case gsNotVariants:
-//        startDemonstration();
+        startDemonstration();
         break;
     case gsVictory:
         checkResult();
@@ -237,5 +232,14 @@ void CBoard::checkResult()
 
     if (result != -1)
         emit signalShowResult(result);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Начать демонстрацию
+void CBoard::startDemonstration()
+{
+    m_scene->hideMessage(false);
+
+    if (!settings->isDecision()) return;
 }
 

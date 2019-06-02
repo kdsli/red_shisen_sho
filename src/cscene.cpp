@@ -135,8 +135,21 @@ void CScene::showMessage(const QString &message, bool is_hide_tiles)
 // Скрыть сообщение
 void CScene::hideMessage(bool is_show_tiles)
 {
-    if (is_show_tiles) setTilesVisible(true);
+    setTilesVisible(is_show_tiles);
     m_message.clear();
+    update();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Показать hint
+void CScene::showHint()
+{
+    if (m_is_path) return;
+
+    clearSelected();
+    // В m_field.path() лежит текущая подсказка
+    m_is_hint = true;
+    slotStartConnect(m_field->hintTiles());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -185,6 +198,8 @@ void CScene::mouseLeft(QPointF point)
 // Нажата правая клавиша мыши
 void CScene::mouseRight(QPointF point)
 {
+    if (m_is_path) return;
+
     clearSelected();
 
     auto tile = getTileIndex(point);
@@ -250,7 +265,9 @@ const QPointF CScene::getTileCenter(const Tile &tile) const
 // Показать/скрыть все плитки
 void CScene::setTilesVisible(bool visible)
 {
-    for (auto tile : m_tiles_list) tile->setVisible(visible);
+    for (auto &tile : m_tiles_list)
+        if (tile)
+            tile->setVisible(visible);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -277,7 +294,10 @@ void CScene::paintMessage(QPainter *painter) const
 // Рассчитать костяшку по координатам виджета
 Tile CScene::getTileIndex(const QPointF point)
 {
-    if (!sceneRect().contains(point))
+    auto rect = sceneRect();
+    rect.setWidth(rect.width() - tiles_manager->shadowWidht());
+    rect.setHeight(rect.height() - tiles_manager->shadowHeight());
+    if (!rect.contains(point))
         return Tile(-1, -1);
 
     int x = static_cast<int>(point.x() / tiles_manager->tileSize().width());
@@ -307,23 +327,25 @@ void CScene::addSelected(const Tile &tile)
 // Окончание таймера пути
 void CScene::doTimerPath()
 {
-    m_field->path().clear();
-
     killTimer(m_path_timer);
     m_path_timer = -1;
     m_is_path = false;
 
-    // Удалить костяшки
-    removeTiles(m_deleted_tiles);
-
     // Сказать board'у перерисовать путь
     emit signalPaintPath();
-    m_path_coords.clear();
 
-    // Проверим состояние программы
-    auto result = m_field->getGameStatus();
-    if (result == vsNotVariant || result == vsVictory)
-        emit signalVariantStatus(result);
+    if (!m_is_hint) {
+        m_field->path().clear();
+
+        // Удалить костяшки
+        removeTiles(m_deleted_tiles);
+
+        // Проверим состояние программы
+        auto result = m_field->getGameStatus();
+        if (result == vsNotVariant || result == vsVictory)
+            emit signalVariantStatus(result);
+    } else
+        m_is_hint = false;
 
     // Статусная строка
     //    emit signalUpdateInfo();
