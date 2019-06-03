@@ -1,8 +1,7 @@
 # red_shisen_sho
 kdsli's version for shishen_sho
 
-This project was created to teach my son programming and to support my professional skills, as well as due to the 
-presence of a certain amount of free time.
+This project was created to teach my son programming and to support my professional skills, and also because of the presence of a certain amount of free time.
 
 It is written without viewing the source code of the KShisen program from KDE and uses only pure QT and graphic images of this project, including tiles and background image.
 The current version uses Ben Gillbanks designer icons (https://iconbird.com/designer/BenGillbanks)
