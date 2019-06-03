@@ -11,8 +11,6 @@
 
 #include <QResizeEvent>
 
-#include <QDebug>
-
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
     m_scene(nullptr)
@@ -34,8 +32,15 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field_types.insert(fz26x14, {26, 14, 8});
     m_field_types.insert(fz30x16, {30, 16, 12});
 
+    connect(m_field, &CField::signalStatusUndoRedo, this, &CBoard::signalUndoRedo);
+
 #ifdef DEFINED_OPENGL
-    setViewport(new QGLWidget(QGLFormat(QGL::DoubleBuffer)));
+    // Paranoia...
+    try {
+        auto gl_widget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
+        if (gl_widget) setViewport(gl_widget);
+    } catch (...) {
+    }
 #endif
 }
 
@@ -48,6 +53,10 @@ void CBoard::createScene()
 
     connect(m_scene, &CScene::signalPaintPath, this, &CBoard::slotRepaintPath);
     connect(m_scene, &CScene::signalVariantStatus, this, &CBoard::slotVariantStatus);
+    connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
+
+    connect(this, &CBoard::signalUndo, m_scene, &CScene::slotUndo);
+    connect(this, &CBoard::signalRedo, m_scene, &CScene::slotRedo);
 
     slotNewGame();
 }
@@ -96,8 +105,6 @@ void CBoard::doNewGame()
     m_game_timer = startTimer(1000);
 
     emit signalUpdateInfo();
-
-//    startDemonstration();
 }
 
 // ------------------------------------------------------------------------------------------------

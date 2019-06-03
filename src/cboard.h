@@ -40,9 +40,9 @@ public:
 signals:
     void signalUpdateInfo();
     void signalUndoRedo(bool, bool);
+    void signalShowResult(int);
     void signalUndo();
     void signalRedo();
-    void signalShowResult(int);
 
 public slots:
     void slotNewGame();

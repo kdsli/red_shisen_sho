@@ -73,25 +73,35 @@ void CScene::fillScene()
     for (int y = 0; y < m_field->m_y; ++y) {
         for (int x = 0; x < m_field->m_x; ++x) {
 
-            auto item_base = new QGraphicsSvgItem;
-            item_base->setSharedRenderer(tiles_manager->currentRenderer());
-            item_base->setElementId(tiles_manager->getBaseName());
-            item_base->setPos(point);
-            item_base->setZValue(n);
+            auto item = createTile(n, point, tiles_manager->tilesNames()[m_field->m_tiles[n]]);
 
-            // Как подчиненный item
-            auto item_tile = new QGraphicsSvgItem(item_base);
-            item_tile->setSharedRenderer(tiles_manager->currentRenderer());
-            item_tile->setElementId(tiles_manager->tilesNames()[m_field->m_tiles[n++]]);
-
-            addItem(item_base);
-            m_tiles_list.append(item_base);
+            addItem(item);
+            m_tiles_list.append(item);
+            ++n;
 
             point.setX(point.x() + tiles_manager->tileSize().width());
         }
         point.setX(0);
         point.setY(point.y() + tiles_manager->tileSize().height());
     }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Создать плитку (основа + плитка)
+QGraphicsSvgItem *CScene::createTile(int n, QPointF point, const QString &element_id)
+{
+    auto item_base = new QGraphicsSvgItem;
+    item_base->setSharedRenderer(tiles_manager->currentRenderer());
+    item_base->setElementId(tiles_manager->getBaseName());
+    item_base->setPos(point);
+    item_base->setZValue(n);
+
+    // Как подчиненный item
+    auto item_tile = new QGraphicsSvgItem(item_base);
+    item_tile->setSharedRenderer(tiles_manager->currentRenderer());
+    item_tile->setElementId(element_id);
+
+    return item_base;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -121,7 +131,6 @@ void CScene::recalcScene()
     // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
     m_message_font_pixel = static_cast<int>(m_message_rect.height() * 0.07);
 }
-
 
 // ------------------------------------------------------------------------------------------------
 // Выделить или не выделить плитку
@@ -409,10 +418,8 @@ void CScene::doFinishPath()
         emit signalPaintPath();
     }
 
-    // Для демонстрации PathType не меняется
-
     // Статусная строка
-    //    emit signalUpdateInfo();
+    emit signalUpdateInfo();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -473,6 +480,32 @@ void CScene::columnMoveDown(const Tile &tile)
 }
 
 // ------------------------------------------------------------------------------------------------
+// Сдвинуть колонку вверх (для undo)
+void CScene::columnMoveUp(const Tile &tile)
+{
+    auto index = m_field->getIndex(Tile(tile.x(), 0));
+    auto finish_index = m_field->getIndex(tile);
+
+    Q_ASSERT_X(!m_tiles_list[index], "CField::unshiftColumn", "Not empty tile");
+
+    forever {
+        auto down_index = index + m_field->m_x;
+        // Условие выхода: если достигнута ячейка
+        if (index == finish_index) break;
+        // Если нижняя ячейка не пустая - копируем ее вверх
+        if (m_tiles_list[down_index]) {
+            // Перемещаем позицию
+            m_tiles_list[down_index]->setPos(getTilePos(index));
+            m_tiles_list[down_index]->setZValue(index);
+            // Перемещаем в поле
+            m_tiles_list[index] = m_tiles_list[down_index];
+        }
+
+        index += m_field->m_x;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
 // Демонстрация (по таймеру)
 void CScene::doDemonstration()
 {
@@ -512,7 +545,7 @@ void CScene::doDemonstration()
 void CScene::clearDemostrationTiles(const TilePair &tiles)
 {
     // Снимем в поле
-    m_field->clearTiles(m_field->m_tiles, tiles);
+    m_field->removeTiles(m_field->m_tiles, tiles);
     // Снимем в сцене
     removeTiles(tiles);
 }
@@ -535,7 +568,6 @@ void CScene::closeDemonstration()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Начать демонстрацию
 void CScene::startDemonstration()
 {
     m_path_type = ptDemostration;
@@ -543,6 +575,51 @@ void CScene::startDemonstration()
     // Текущий номер демонстрации - индекс в массиве m_field->m_right_pathes
     m_demostration_index = 0;
 
-    // Запускаем таймер демонстрации
     m_demostration_timer = startTimer(settings->timeDelay());
+}
+
+// ------------------------------------------------------------------------------------------------
+void CScene::slotUndo()
+{
+    // Вернуть два костяшки в поле
+    auto undo_item = m_field->doUndo();
+
+    auto &tile1 = std::get<0>(undo_item);
+    auto &tile2 = std::get<1>(undo_item);
+    auto element_id = tiles_manager->tilesNames()[std::get<2>(undo_item)];
+
+    // Сдвинем колонки вверх
+    if (settings->isGravity()) {
+          // Отдельный случай - если костяшки лежат друг над другом по вертикали
+          if (tile1.x() == tile2.x()) {
+              // Просто сдвинуть колонку вверх начиная с нижней
+              columnMoveUp(tile1.y() > tile2.y() ? tile1 : tile2);
+              columnMoveUp(tile1.y() > tile2.y() ? tile2 : tile1);
+          } else {
+              // Снять обычным образом
+              columnMoveUp(tile1);
+              columnMoveUp(tile2);
+          }
+    }
+
+    // Создать новые SvgItem
+    auto point1 = getTilePos(tile1);
+    auto point2 = getTilePos(tile2);
+    auto index1 = m_field->getIndex(tile1);
+    auto index2 = m_field->getIndex(tile2);
+
+    auto item1 = createTile(index1, point1, element_id);
+    auto item2 = createTile(index2, point2, element_id);
+
+    addItem(item1);
+    addItem(item2);
+
+    // Поместим их в m_tiles_list в нужное место
+    m_tiles_list[index1] = item1;
+    m_tiles_list[index2] = item2;
+}
+
+void CScene::slotRedo()
+{
+
 }

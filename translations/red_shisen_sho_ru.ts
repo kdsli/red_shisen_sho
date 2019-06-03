@@ -4,7 +4,7 @@
 <context>
     <name>CBoard</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+64"/>
+        <location filename="../src/cboard.cpp" line="+61"/>
         <source>Ваше время: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -14,17 +14,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+496"/>
-        <source>Игра приостановлена.</source>
+        <location line="+53"/>
+        <source>Игра приостановлена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+0"/>
+        <source>Щелкните для продолжения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+131"/>
         <source>Вы выиграли!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+10"/>
         <source>Игра зашла в тупик.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -34,8 +39,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-14"/>
-        <location line="+15"/>
+        <location line="+1"/>
         <source>Щелкните для продолжения...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -133,7 +137,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+93"/>
+        <location filename="../src/cmainwindow.cpp" line="+111"/>
         <source>Внимание!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -332,7 +336,7 @@
 <context>
     <name>CTilesManager</name>
     <message>
-        <location filename="../src/ctilesmanager.cpp" line="+63"/>
+        <location filename="../src/ctilesmanager.cpp" line="+100"/>
         <source>Отсутствует директория tileset</source>
         <translation type="unfinished"></translation>
     </message>

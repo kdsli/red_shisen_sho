@@ -46,8 +46,12 @@ CSettings::CSettings() : CKeeperSettings ()
 
     // Если такого перевода нет - сделаем по умолчанию
     initLanguagesList();
-    if (!m_languages.contains(m_locale))
+    if (!m_languages.contains(m_locale)) {
         m_locale = QLocale::system().bcp47Name();
+        if (!m_languages.contains(m_locale)) {
+            m_locale = "en";
+        }
+    }
 
     // Создадим список названий игр, чтобы не создавать его каждый раз
     for (const auto &name : game_types) {

@@ -28,9 +28,13 @@ public:
     // Проверка состояния игры (есть ли дальше варианты, достигнута ли победа)
     VariantStatus getGameStatus();
 
+    UndoItem doUndo();
+
 signals:
     // Сигнал снять костяшки и отобразить путь
     void signalStartConnect(const TilePair &tiles);
+    // Сигнал изменения активности Undo/Redo
+    void signalStatusUndoRedo(bool is_undo, bool is_redo);
 
 private:
     // Размеры поля
@@ -51,6 +55,11 @@ private:
     TileList m_deleted_list;
     // Список костяшек для подсказки
     TilePair m_hint_tiles;
+    // Место для хранения последовательности снятия костяшек. Используется для Undo
+    // Каждое снятие помещает в сюда два QPoint и тип ячейки, который сняли
+    UndoList m_undo;
+    // Текущее положение в списке m_undo
+    int m_current_undo;
 
     // Получить индекс в массиве Field по координатам
     int getIndex(int x, int y) const;
@@ -94,9 +103,15 @@ private:
     int farVert(const Field &field, Tile tile, int direct, int limit) const;
 
     // Удалить костяшки
-    void clearTiles(Field &field, TilePair tiles);
+    void removeTiles(Field &field, TilePair tiles);
     // Сдвинуть колонку вниз
     void columnMoveDown(Field &field, const Tile &);
+
+    // Проверить активность undo/redo и отправить сигнал при изменении
+    void checkStatusUndoRedo();
+
+    // Сдвинуть колонку вверх (для Undo)
+    void columnMoveUp(Tile tile);
 };
 
 #endif // CFIELD_H

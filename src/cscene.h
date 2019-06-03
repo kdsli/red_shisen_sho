@@ -45,6 +45,12 @@ signals:
     void signalPaintPath();
     // Изменился статус программы
     void signalVariantStatus(VariantStatus);
+    // Сигнал изменения статусной информации
+    void signalUpdateInfo();
+
+public slots:
+    void slotUndo();
+    void slotRedo();
 
 protected:
     void drawBackground(QPainter *painter, const QRectF &rect) override;
@@ -86,6 +92,9 @@ private:
     // Прересчитать логические координаты сцены
     void recalcScene();
 
+    // Создать плитку (основа + плитка)
+    QGraphicsSvgItem *createTile(int n, QPointF, const QString &);
+
     // Вернуть левый верхний угол ячейки
     const QPointF getTilePos(const Tile &tile) const;
     const QPointF getTilePos(const int index) const;
@@ -119,15 +128,14 @@ private:
     // Нарисовать путь
     void paintPath(QPainter *painter);
 
-    // Сдвинуть колонку вниз
+    // Сдвинуть колонку вниз и вверх
     void columnMoveDown(const Tile &tile);
+    void columnMoveUp(const Tile &tile);
 
     // Демонстрация (по таймеру)
     void doDemonstration();
     void clearDemostrationTiles(const TilePair &tiles);
     void closeDemonstration();
-
-
 
 private slots:
     void slotStartConnect(const TilePair &tiles);

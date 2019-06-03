@@ -21,6 +21,9 @@ void CField::newGame(int x, int y, int count)
 
     m_tiles.resize(m_tiles_count);
     m_tiles.fill(-1);
+    m_undo.clear();
+    m_current_undo = -1;
+    checkStatusUndoRedo();
 
     // Создадим последовательный список чисел и заполним его последовательными числами
     Field v(m_tiles_count);
@@ -68,8 +71,16 @@ void CField::Connect(const TilePair &tiles)
 {
     if (!checkConnect(m_tiles, tiles)) return;
 
+    // Заполним Undo
+    ++m_current_undo;
+    // Обрубим значения, которые осталось после Undo
+    m_undo.resize(m_current_undo);
+    // Сохраним снятые костяшки в списке ходов
+    m_undo.append(UndoItem(tiles.first, tiles.second, m_tiles[getIndex(tiles.first)]));
+    checkStatusUndoRedo();
+
     // Снимем костяшки
-    clearTiles(m_tiles, tiles);
+    removeTiles(m_tiles, tiles);
     m_remaining -= 2;
     // Соединить можно, в m_path лежит путь для отображения - сказать
     emit signalStartConnect(tiles);
@@ -212,8 +223,8 @@ void CField::takeTilesOff(Field &field, Field &collation, int &current_tile_coun
         // Идем по всем элементам. Если не нашли варианты - выходим
         if (!checkVariants(field, tiles)) return;
         // Нашли вариант. Cнимаем его костяшки из обоих полей
-        clearTiles(field, tiles);
-        clearTiles(collation, tiles);
+        removeTiles(field, tiles);
+        removeTiles(collation, tiles);
         current_tile_count -= 2;
         // И сохраним их в списке
         m_right_pathes.append(tiles);
@@ -575,7 +586,7 @@ int CField::farVert(const Field &field, Tile tile, int direct, int limit) const
 
 // ------------------------------------------------------------------------------------------------
 // Удалить костяшки
-void CField::clearTiles(Field &field, TilePair tiles)
+void CField::removeTiles(Field &field, TilePair tiles)
 {
     field[getIndex(tiles.first)] = -1;
     field[getIndex(tiles.second)] = -1;
@@ -618,3 +629,74 @@ void CField::columnMoveDown(Field &field, const Tile &tile)
         index -= m_x;
     }
 }
+
+// ------------------------------------------------------------------------------------------------
+// Проверить активность undo/redo и отправить сигнал при изменении
+void CField::checkStatusUndoRedo()
+{
+    // Undo enabled, если есть снятые костяшки, Redo - если текущий не указывает на конец
+    emit signalStatusUndoRedo(m_current_undo >= 0, m_current_undo < m_undo.size() - 1);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Сдвинуть колонку вверх (для Undo)
+void CField::columnMoveUp(Tile tile)
+{
+    auto index = getIndex(Tile(tile.x(), 0));
+    auto finish_index = getIndex(tile);
+    Q_ASSERT_X(m_tiles[index] == -1, "CField::unshiftColumn", "Not empty tile");
+
+    forever {
+        // Условие выхода: если достигнута ячейка
+        if (index == finish_index) break;
+
+        // Если нижняя ячейка не пустая - копируем ее вверх
+        if (m_tiles[index + m_x] != -1)
+            m_tiles[index] = m_tiles[index + m_x];
+
+        index += m_x;
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// m_current_undo всегда указывает на костяшку, которой нужно делать undo
+// При снятии костяшки m_current_undo будет указывать на последний элемент
+// списка m_undo. При redo список не очищается, а костяшки снимаются, но m_current_undo
+// сдвигается влево. Таким образом, для redo костяшка для повторения всегда
+// будет справа от m_current_undo
+UndoItem CField::doUndo()
+{
+    Q_ASSERT_X(!m_undo.isEmpty(), "CField::undo", "Undo list is empty");
+
+    // Вытащим две последние костяшки
+    auto undo_item = m_undo[m_current_undo];
+    auto tile1 = std::get<0>(undo_item);
+    auto tile2 = std::get<1>(undo_item);
+    auto type = std::get<2>(undo_item);
+
+    // Если гравитация
+    if (settings->isGravity()) {
+        // Отдельный случай - если костяшки лежат друг над другом по вертикали
+        if (tile1.x() == tile2.x()) {
+            // Просто сдвинуть колонку вверх начиная с нижней
+            columnMoveUp(tile1.y() > tile2.y() ? tile1 : tile2);
+            columnMoveUp(tile1.y() > tile2.y() ? tile2 : tile1);
+        } else {
+            // Снять обычным образом
+            columnMoveUp(tile1);
+            columnMoveUp(tile2);
+        }
+    }
+
+    // Ячейки вернем на место
+    m_tiles[getIndex(tile1)] = type;
+    m_tiles[getIndex(tile2)] = type;
+    m_remaining += 2;
+
+    --m_current_undo;
+
+    checkStatusUndoRedo();
+
+    return undo_item;
+}
+
