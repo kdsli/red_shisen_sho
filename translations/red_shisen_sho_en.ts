@@ -4,7 +4,7 @@
 <context>
     <name>CBoard</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+61"/>
+        <location filename="../src/cboard.cpp" line="+67"/>
         <source>Ваше время: </source>
         <translation>Time&quot;: </translation>
     </message>
@@ -24,12 +24,17 @@
         <translation>Click to resume game</translation>
     </message>
     <message>
-        <location line="+131"/>
-        <source>Вы выиграли!</source>
-        <translation>You won!</translation>
+        <location line="+145"/>
+        <source>Вы выиграли за </source>
+        <translation>You won in </translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+2"/>
+        <source>Вы не пользовались подсказками, пожалуй, мы занесем ваш результат в таблицу рекордов</source>
+        <translation>You didn’t use prompts, perhaps we will put your result in the table of records</translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Игра зашла в тупик.</source>
         <translation>The game is deadlocked.</translation>
     </message>

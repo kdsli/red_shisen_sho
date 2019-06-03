@@ -4,7 +4,7 @@
 <context>
     <name>CBoard</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+61"/>
+        <location filename="../src/cboard.cpp" line="+67"/>
         <source>Ваше время: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -24,12 +24,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+131"/>
-        <source>Вы выиграли!</source>
+        <location line="+145"/>
+        <source>Вы выиграли за </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+2"/>
+        <source>Вы не пользовались подсказками, пожалуй, мы занесем ваш результат в таблицу рекордов</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Игра зашла в тупик.</source>
         <translation type="unfinished"></translation>
     </message>

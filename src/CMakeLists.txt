@@ -42,6 +42,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/kmahjongglib DESTINATION ${EXECUTABLE_OU
 
 # Чтобы не появлялось окно командной строки при запуске в Windows
 IF(WIN32)
+    # WIN32 и для x86, и для x86_64
     set(GUI_TYPE WIN32)
 ENDIF(WIN32)
 

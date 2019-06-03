@@ -17,7 +17,7 @@ public:
     explicit CField(QObject *parent = nullptr);
 
     // Новая игра
-    void newGame(int x, int y, int count_in_type);
+    void newGame(int x, int y, int count);
 
     // Вернуть начальное поле
     void restoreField();
@@ -29,6 +29,7 @@ public:
     VariantStatus getGameStatus();
 
     UndoItem doUndo();
+    TilePair doRedo();
 
 signals:
     // Сигнал снять костяшки и отобразить путь
@@ -38,11 +39,11 @@ signals:
 
 private:
     // Размеры поля
-    int m_x, m_y;
-    int m_count_in_type;
-    int m_tiles_count;
+    int m_x{0}, m_y{0};
+    int m_count_in_type{0};
+    int m_tiles_count{0};
     // Текущее количество костяшек
-    int m_remaining;
+    int m_remaining{0};
     // Поле
     Field m_tiles;
     // Начальное поле (для начала игра с начала и демонстрации)
@@ -59,7 +60,7 @@ private:
     // Каждое снятие помещает в сюда два QPoint и тип ячейки, который сняли
     UndoList m_undo;
     // Текущее положение в списке m_undo
-    int m_current_undo;
+    int m_current_undo{0};
 
     // Получить индекс в массиве Field по координатам
     int getIndex(int x, int y) const;
@@ -72,12 +73,12 @@ private:
     int getTileType(int index);
 
     // Перемешать массив
-    void shuffleField(Field &tiles) const;
+    void shuffleField(Field &field) const;
 
     // Сделать так, чтобы существовал минимум один путь снятия
     void shuffleDecisionVariant();
     // Снять все возможные костяшки (вызывается из shuffleDecisionVariant)
-    void takeTilesOff(Field &field, Field &collation, int &currentTile_count);
+    void takeTilesOff(Field &field, Field &collation, int &current_tile_count);
 
     // Проверить существование вариантов снятия
     bool checkVariants(const Field &field, TilePair &tiles);

@@ -5,8 +5,6 @@
 #include <QScreen>
 #include <QApplication>
 
-#include <QDebug>
-
 static const QString GEOMETRY_GROUP = "Geometry";
 
 // Тип указателя на метод класса

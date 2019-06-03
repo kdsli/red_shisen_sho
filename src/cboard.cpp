@@ -55,8 +55,8 @@ void CBoard::createScene()
     connect(m_scene, &CScene::signalVariantStatus, this, &CBoard::slotVariantStatus);
     connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
 
-    connect(this, &CBoard::signalUndo, m_scene, &CScene::slotUndo);
-    connect(this, &CBoard::signalRedo, m_scene, &CScene::slotRedo);
+    connect(this, &CBoard::signalUndo, this, &CBoard::slotUndo);
+    connect(this, &CBoard::signalRedo, this, &CBoard::slotRedo);
 
     slotNewGame();
 }
@@ -64,10 +64,7 @@ void CBoard::createScene()
 // ------------------------------------------------------------------------------------------------
 QString CBoard::gameInfo()
 {
-    QTime t(0, 0, 0);
-    t = t.addSecs(m_seconds);
-
-    return tr("Ваше время: ") + t.toString("hh:m:ss") + tr("  Удалено: ")
+    return tr("Ваше время: ") + getSecondsString() + tr("  Удалено: ")
             + QString::number(m_field->m_tiles_count - m_field->m_remaining) + "/"
             + QString::number(m_field->m_tiles_count);
 }
@@ -94,6 +91,7 @@ void CBoard::slotRepeatGame()
 void CBoard::doNewGame()
 {
     m_game_state = gsNormal;
+    m_is_cunning = false;
 
     // Заполним сцену новыми значениями
     m_scene->newGame();
@@ -112,6 +110,7 @@ void CBoard::slotHint()
 {
     // Скажем сцене поместить в путь
     m_scene->showHint();
+    m_is_cunning = true;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -244,12 +243,29 @@ void CBoard::slotVariantStatus(VariantStatus status)
 }
 
 // ------------------------------------------------------------------------------------------------
+void CBoard::slotUndo()
+{
+    m_is_cunning = true;
+    m_scene->slotUndo();
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::slotRedo()
+{
+    m_is_cunning = true;
+    m_scene->slotRedo();
+}
+
+// ------------------------------------------------------------------------------------------------
 // Победа!
 void CBoard::doVictory()
 {
     m_game_state = gsVictory;
     stopGameTimer();
-    m_scene->showMessage(tr("Вы выиграли!"));
+    QString s = tr("Вы выиграли за ") + getSecondsString() + "!";
+    if (settings->isTraining() && !m_is_cunning)
+        s += "\n" + tr("Вы не пользовались подсказками, пожалуй, мы занесем ваш результат в таблицу рекордов");
+    m_scene->showMessage(s);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -271,10 +287,11 @@ void CBoard::checkResult()
     m_game_state = gsEmpty;
     m_scene->hideMessage(false);
 
-    auto result = records_manager->checkRecord(m_seconds);
+    int result = -1;
+    if (!settings->isTraining() || !m_is_cunning)
+        result = records_manager->checkRecord(m_seconds);
 
-    if (result != -1)
-        emit signalShowResult(result);
+    emit signalShowResult(result);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -300,5 +317,15 @@ void CBoard::stopGameTimer()
     Q_ASSERT(m_game_timer != -1);
     killTimer(m_game_timer);
     m_game_timer = -1;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Секунды в строку
+QString CBoard::getSecondsString()
+{
+    QTime t(0, 0, 0);
+    t = t.addSecs(m_seconds);
+
+    return t.toString("hh:mm:ss");
 }
 

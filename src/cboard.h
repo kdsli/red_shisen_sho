@@ -69,6 +69,8 @@ private:
     int m_game_timer;
     // Секунды игры
     int m_seconds;
+    // Использовались ли хитрости
+    bool m_is_cunning;
 
     // Пересчитать view (вызвается при инициализации и каждом изменении размера)
     void recalcView();
@@ -88,11 +90,17 @@ private:
     // Начать демонстрацию
     void startDemonstration();
 
+    // Остановить таймер игры
     void stopGameTimer();
+
+    // Секунды в строку
+    QString getSecondsString();
 
 private slots:
     void slotRepaintPath();
     void slotVariantStatus(VariantStatus);
+    void slotUndo();
+    void slotRedo();
 };
 
 #endif // CBOARD_H

@@ -666,7 +666,7 @@ void CField::columnMoveUp(Tile tile)
 // будет справа от m_current_undo
 UndoItem CField::doUndo()
 {
-    Q_ASSERT_X(!m_undo.isEmpty(), "CField::undo", "Undo list is empty");
+    Q_ASSERT_X(!m_undo.isEmpty(), "CField::doUndo", "Undo list is empty");
 
     // Вытащим две последние костяшки
     auto undo_item = m_undo[m_current_undo];
@@ -698,5 +698,23 @@ UndoItem CField::doUndo()
     checkStatusUndoRedo();
 
     return undo_item;
+}
+
+// ------------------------------------------------------------------------------------------------
+TilePair CField::doRedo()
+{
+    Q_ASSERT_X(m_current_undo < m_undo.size(), "CField::doRedo", "Error undo definition");
+
+    // Вытащим пару костяшек, которые нужно убрать
+    auto undo_item = m_undo[m_current_undo + 1];
+    auto tiles = TilePair(std::get<0>(undo_item), std::get<1>(undo_item));
+    // И удаляем их
+    removeTiles(m_tiles, tiles);
+    m_remaining -= 2;
+
+    ++m_current_undo;
+    checkStatusUndoRedo();
+
+    return tiles;
 }
 

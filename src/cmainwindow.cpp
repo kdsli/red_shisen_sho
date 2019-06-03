@@ -12,8 +12,6 @@
 #include <QPushButton>
 #include <QKeyEvent>
 
-#include <QDebug>
-
 CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     ui(new Ui::CMainWindow),
     m_board(nullptr),

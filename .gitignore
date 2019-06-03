@@ -8,3 +8,4 @@ output_Release
 output_release
 CMakeLists.txt.user
 src/version.inc
+olds

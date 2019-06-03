@@ -9,9 +9,6 @@
 #include <QSvgRenderer>
 #include <QTimerEvent>
 
-#include <QDebug>
-
-
 CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
     m_field(field)
 {
@@ -439,6 +436,7 @@ void CScene::slotStartConnect(const TilePair &tiles)
 // Снять костяшки
 void CScene::removeTiles(const TilePair &tiles)
 {
+    // Удалить QGraphicsSvgItem
     auto index = m_field->getIndex(tiles.first);
     removeItem(m_tiles_list[index]);
     m_tiles_list[index] = nullptr;
@@ -619,7 +617,11 @@ void CScene::slotUndo()
     m_tiles_list[index2] = item2;
 }
 
+// ------------------------------------------------------------------------------------------------
 void CScene::slotRedo()
 {
+    auto tiles = m_field->doRedo();
 
+    // Удалим эти костяшки из сцены
+    removeTiles(tiles);
 }
