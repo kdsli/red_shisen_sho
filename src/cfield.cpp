@@ -17,7 +17,7 @@ void CField::newGame(int x, int y, int count)
     m_y = y;
     m_count_in_type = count;
     m_tiles_count = m_x * m_y;
-    m_current_count = m_tiles_count;
+    m_remaining = m_tiles_count;
 
     m_tiles.resize(m_tiles_count);
     m_tiles.fill(-1);
@@ -47,8 +47,19 @@ void CField::newGame(int x, int y, int count)
         shuffleDecisionVariant();
     }
 
+    // Сохраним начальное поле
+    m_old_tiles = m_tiles;
+
     // Найдем первый вариант - в пути будет подсказка
     checkVariants(m_tiles, m_hint_tiles);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Вернуть начальное поле
+void CField::restoreField()
+{
+    m_tiles = m_old_tiles;
+    m_remaining = m_tiles_count;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -59,7 +70,7 @@ void CField::Connect(const TilePair &tiles)
 
     // Снимем костяшки
     clearTiles(m_tiles, tiles);
-    m_current_count -= 2;
+    m_remaining -= 2;
     // Соединить можно, в m_path лежит путь для отображения - сказать
     emit signalStartConnect(tiles);
 }
@@ -68,7 +79,7 @@ void CField::Connect(const TilePair &tiles)
 // Проверка состояния игры (есть ли дальше варианты, достигнута ли победа)
 VariantStatus CField::getGameStatus()
 {
-    if (m_current_count == 0) return vsVictory;
+    if (m_remaining == 0) return vsVictory;
     if (!checkVariants(m_tiles, m_hint_tiles)) return vsNotVariant;
 
     // В пути будет лежать подсказка, а костяшки для подсказки - в m_hint_tiles

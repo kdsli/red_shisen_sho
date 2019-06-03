@@ -39,6 +39,7 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
 #endif
 }
 
+// ------------------------------------------------------------------------------------------------
 void CBoard::createScene()
 {
     m_scene = new CScene(m_field, this);
@@ -51,29 +52,52 @@ void CBoard::createScene()
     slotNewGame();
 }
 
+// ------------------------------------------------------------------------------------------------
 QString CBoard::gameInfo()
 {
-    return "";
+    QTime t(0, 0, 0);
+    t = t.addSecs(m_seconds);
+
+    return tr("Ваше время: ") + t.toString("hh:m:ss") + tr("  Удалено: ")
+            + QString::number(m_field->m_tiles_count - m_field->m_remaining) + "/"
+            + QString::number(m_field->m_tiles_count);
 }
 
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotNewGame()
 {
-    m_game_state = gsNormal;
-
     m_field->newGame(m_field_types[settings->currentGameType()].x,
             m_field_types[settings->currentGameType()].y,
             m_field_types[settings->currentGameType()].count);
 
-    // Заполним сцену новыми значениями
-    m_scene->newGame();
-
-    recalcView();
+    doNewGame();
 }
 
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotRepeatGame()
 {
+    m_field->restoreField();
+    doNewGame();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Новая игра
+void CBoard::doNewGame()
+{
+    m_game_state = gsNormal;
+
+    // Заполним сцену новыми значениями
+    m_scene->newGame();
+
+    recalcView();
+
+    // Запускаем таймер игры
+    m_seconds = 0;
+    m_game_timer = startTimer(1000);
+
+    emit signalUpdateInfo();
+
+//    startDemonstration();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -97,7 +121,7 @@ void CBoard::slotPause()
 }
 
 // ------------------------------------------------------------------------------------------------
-// Изменился тип игры
+// Изменился тип игры (из окна настроек)
 void CBoard::slotNewTypeGame()
 {
     slotNewGame();
@@ -131,13 +155,24 @@ void CBoard::mousePressEvent(QMouseEvent *event)
          clickLeftButton(event);
      if (event->buttons().testFlag(Qt::RightButton) && settings->isTraining())
          clickRightButton(event);
- }
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_game_timer) {
+        if (m_game_state == gsNormal) {
+            ++m_seconds;
+            emit signalUpdateInfo();
+        }
+    }
+}
 
 // ------------------------------------------------------------------------------------------------
 // Пересчитать view (вызвается при инициализации и каждом изменении размера)
 void CBoard::recalcView()
 {
-    fitInView(m_scene->fieldRect(), Qt::KeepAspectRatio);
+    fitInView(m_scene->m_field_rect, Qt::KeepAspectRatio);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,7 +186,7 @@ void CBoard::clickLeftButton(QMouseEvent *event)
         slotPause();
         break;
     case gsDemostration:
-//        closeDemonstration();
+        m_scene->closeDemonstration();
         break;
     case gsNotVariants:
         startDemonstration();
@@ -175,13 +210,13 @@ void CBoard::clickRightButton(QMouseEvent *event)
 // Отобразить путь
 void CBoard::slotRepaintPath()
 {
-    if (m_scene->pathCoords().isEmpty()) return;
+    if (m_field->m_path.isEmpty()) return;
 
     QRegion region;
 
-    auto prev_coord = mapFromScene(m_scene->pathCoords()[0]);
-    for (int i = 1; i < m_scene->pathCoords().size(); ++i) {
-        auto coord = mapFromScene(m_scene->pathCoords()[1]);
+    auto prev_coord = mapFromScene(m_field->m_path[0]);
+    for (int i = 1; i < m_field->m_path.size(); ++i) {
+        auto coord = mapFromScene(m_field->m_path[i]);
         auto rect = QRectF(prev_coord, coord).normalized();
         rect.adjust(-1, -1, 1, 1);
         region += rect.toRect();
@@ -206,14 +241,16 @@ void CBoard::slotVariantStatus(VariantStatus status)
 void CBoard::doVictory()
 {
     m_game_state = gsVictory;
+    stopGameTimer();
     m_scene->showMessage(tr("Вы выиграли!"));
 }
 
 // ------------------------------------------------------------------------------------------------
-// Поражение
+// Поражение :(
 void CBoard::doNotVariant()
 {
     m_game_state = gsNotVariants;
+    stopGameTimer();
 
     QString s = tr("Игра зашла в тупик.") + "\n";
     if (settings->isDecision())
@@ -227,8 +264,7 @@ void CBoard::checkResult()
     m_game_state = gsEmpty;
     m_scene->hideMessage(false);
 
-//    auto result = records_manager->checkRecord(m_second);
-    auto result = 1;
+    auto result = records_manager->checkRecord(m_seconds);
 
     if (result != -1)
         emit signalShowResult(result);
@@ -240,6 +276,22 @@ void CBoard::startDemonstration()
 {
     m_scene->hideMessage(false);
 
+    // Вернуть на место поля и сцену
+    m_field->restoreField();
+    m_scene->fillScene();
+
     if (!settings->isDecision()) return;
+
+    m_game_state = gsDemostration;
+
+    m_scene->startDemonstration();
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::stopGameTimer()
+{
+    Q_ASSERT(m_game_timer != -1);
+    killTimer(m_game_timer);
+    m_game_timer = -1;
 }
 

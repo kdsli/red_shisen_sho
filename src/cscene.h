@@ -13,16 +13,18 @@ class CField;
 class CScene : public QGraphicsScene
 {
     Q_OBJECT
+    friend class CBoard;
 public:
     explicit CScene(CField *field, QObject *parent = nullptr);
-
-    const QRectF &fieldRect() const { return m_field_rect; }
 
     // Установить фоновое изображение
     void setBackground(const QString &file_name);
 
     // Новая игра
     void newGame();
+
+    // Заполнить сцену костяшками
+    void fillScene();
 
     // Показать/скрыть сообщение
     void showMessage(const QString &message, bool is_hide_tiles = false);
@@ -35,8 +37,8 @@ public:
     void mouseLeft(QPointF point);
     void mouseRight(QPointF point);
 
-    // Патч в координатах сцены
-    const CoordList &pathCoords() const { return m_path_coords; }
+    // Начать демонстрацию
+    void startDemonstration();
 
 signals:
     // Сигнал перерисовать путь
@@ -50,6 +52,9 @@ protected:
     void timerEvent(QTimerEvent *event) override;
 
 private:
+    // Тип пути, который показывается в настоящее время
+    enum PathType {ptNone, ptPath, ptHint, ptDemostration};
+
     QPixmap m_bg_pixmap;
     CField *m_field;
     // Rect поля (костяшки + margins)
@@ -64,16 +69,22 @@ private:
     int m_message_font_pixel;
     // Выделенные в текущий момент костяшки
     TileList m_selected;
-    // Таймеры
+    // Таймер пути
     int m_path_timer;
     // Костяшки, которые нужно будет снять после показа пути
     TilePair m_deleted_tiles;
-    // Признак того, что в данное время показывается путь
-    bool m_is_path{false};
-    // Признак того, что в данное время показывается подсказка
-    bool m_is_hint{false};
-    // Список текущего пути в координатах сцены
+    // Текущий тип пути
+    PathType m_path_type{ptNone};
+    // Списоки текущего и прошлого (для демонстрации) пути в координатах сцены
     CoordList m_path_coords;
+    CoordList m_old_path_coords;
+    // Текущий индекс демонстрции
+    int m_demostration_index;
+    // Таймер демонстрации
+    int m_demostration_timer;
+
+    // Прересчитать логические координаты сцены
+    void recalcScene();
 
     // Вернуть левый верхний угол ячейки
     const QPointF getTilePos(const Tile &tile) const;
@@ -100,14 +111,23 @@ private:
     // Снимаем костяшки
     void removeTiles(const TilePair &tiles);
 
+    // Запустить таймер рисования пути
+    void doStartPath(const TilePair &tiles);
     // Окончание таймера пути
-    void doTimerPath();
+    void doFinishPath();
 
     // Нарисовать путь
     void paintPath(QPainter *painter);
 
     // Сдвинуть колонку вниз
     void columnMoveDown(const Tile &tile);
+
+    // Демонстрация (по таймеру)
+    void doDemonstration();
+    void clearDemostrationTiles(const TilePair &tiles);
+    void closeDemonstration();
+
+
 
 private slots:
     void slotStartConnect(const TilePair &tiles);

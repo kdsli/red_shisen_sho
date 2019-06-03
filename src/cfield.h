@@ -6,38 +6,21 @@
 #include <QObject>
 #include <QVector>
 
-// Класс, отвечающий за игровое поле
+// Класс, отвечающий за игровое поле и логику
 
 class CField : public QObject
 {
     Q_OBJECT
+    friend class CBoard;
+    friend class CScene;
 public:
     explicit CField(QObject *parent = nullptr);
 
-    // Размеры поля
-    int x() const { return m_x; }
-    int y() const { return m_y; }
-    int tilesCount() const { return m_tiles_count; }
-
-    // Найденный путь снятия костяшек
-    TileList &path() { return m_path; }
-    // Костяшки для подсказки
-    const TilePair hintTiles() const { return m_hint_tiles; }
-
-    // Поле
-    const Field &tiles() const { return m_tiles; }
-    // Получить индекс в массиве Field по координатам
-    int getIndex(int x, int y) const;
-    int getIndex(Tile tile) const;
-    // Обратная процедура - получить костяшку (координаты) по индексу
-    Tile getTile(int index) const;
-
-    // Получить тип костяшки
-    int getTileType(Tile &tile);
-    int getTileType(int index);
-
     // Новая игра
     void newGame(int x, int y, int count_in_type);
+
+    // Вернуть начальное поле
+    void restoreField();
 
     // Соединим две ячейки (если возможно)
     void Connect(const TilePair &tiles);
@@ -55,9 +38,11 @@ private:
     int m_count_in_type;
     int m_tiles_count;
     // Текущее количество костяшек
-    int m_current_count;
+    int m_remaining;
     // Поле
     Field m_tiles;
+    // Начальное поле (для начала игра с начала и демонстрации)
+    Field m_old_tiles;
     // Список правильных снятий, вычисленных на этапе определения вариантов
     TilePairList m_right_pathes;
     // Текущий путь
@@ -66,6 +51,16 @@ private:
     TileList m_deleted_list;
     // Список костяшек для подсказки
     TilePair m_hint_tiles;
+
+    // Получить индекс в массиве Field по координатам
+    int getIndex(int x, int y) const;
+    int getIndex(Tile tile) const;
+    // Обратная процедура - получить костяшку (координаты) по индексу
+    Tile getTile(int index) const;
+
+    // Получить тип костяшки
+    int getTileType(Tile &tile);
+    int getTileType(int index);
 
     // Перемешать массив
     void shuffleField(Field &tiles) const;

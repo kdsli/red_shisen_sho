@@ -1,8 +1,9 @@
 #include "ckeepersettings.h"
 
-#include <QCoreApplication>
 #include <QDir>
 #include <QMainWindow>
+#include <QScreen>
+#include <QApplication>
 
 #include <QDebug>
 
@@ -44,7 +45,11 @@ void CKeeperSettings::doExit(QObject *obj)
 {
     auto widget = qobject_cast<QWidget *>(obj);
     beginGroup(GEOMETRY_GROUP);
-    setValue(widget->objectName(), widget->saveGeometry());
+    if (widget->inherits("QMainWindow")) {
+        setValue(widget->objectName(), widget->geometry());
+    } else {
+        setValue(widget->objectName(), widget->saveGeometry());
+    }
     endGroup();
 }
 
@@ -58,7 +63,16 @@ void CKeeperSettings::registerGeometry(QWidget *widget)
 
     // Прочитаем состояние геометрии окна
     beginGroup(GEOMETRY_GROUP);
-    widget->restoreGeometry(value(widget->objectName()).toByteArray());
+    if (widget->inherits("QMainWindow")) {
+
+        // CMainWindow=@Rect(0 59 1280 920)
+        auto screen = QApplication::primaryScreen();
+        auto geometry = value(widget->objectName(), screen->availableGeometry());
+        widget->setGeometry(geometry.toRect());
+
+    } else {
+        widget->restoreGeometry(value(widget->objectName()).toByteArray());
+    }
     endGroup();
 }
 

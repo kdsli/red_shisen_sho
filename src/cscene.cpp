@@ -52,6 +52,17 @@ void CScene::setBackground(const QString &file_name)
 // ------------------------------------------------------------------------------------------------
 void CScene::newGame()
 {
+    m_path_type = ptNone;
+    // Заполнить сцену костяшками
+    fillScene();
+    // Прересчитать логические координаты сцены
+    recalcScene();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Заполнить сцену костяшками
+void CScene::fillScene()
+{
     clear();
     m_tiles_list.clear();
     m_selected.clear();
@@ -59,8 +70,8 @@ void CScene::newGame()
     QPointF point(0, 0);
     int n = 0;
 
-    for (int y = 0; y < m_field->y(); ++y) {
-        for (int x = 0; x < m_field->x(); ++x) {
+    for (int y = 0; y < m_field->m_y; ++y) {
+        for (int x = 0; x < m_field->m_x; ++x) {
 
             auto item_base = new QGraphicsSvgItem;
             item_base->setSharedRenderer(tiles_manager->currentRenderer());
@@ -68,9 +79,10 @@ void CScene::newGame()
             item_base->setPos(point);
             item_base->setZValue(n);
 
+            // Как подчиненный item
             auto item_tile = new QGraphicsSvgItem(item_base);
             item_tile->setSharedRenderer(tiles_manager->currentRenderer());
-            item_tile->setElementId(tiles_manager->tilesNames()[m_field->tiles()[n++]]);
+            item_tile->setElementId(tiles_manager->tilesNames()[m_field->m_tiles[n++]]);
 
             addItem(item_base);
             m_tiles_list.append(item_base);
@@ -80,17 +92,20 @@ void CScene::newGame()
         point.setX(0);
         point.setY(point.y() + tiles_manager->tileSize().height());
     }
+}
 
-    // Координаты ниже - в логических единицах
-
+// ------------------------------------------------------------------------------------------------
+// Прересчитать логические координаты сцены
+void CScene::recalcScene()
+{
     // Реальная ширина/высота поля с учетом тени последних костяшек
-    auto w = tiles_manager->tileSize().width() * m_field->x() +
+    auto w = tiles_manager->tileSize().width() * m_field->m_x +
             (tiles_manager->baseSize().width() - tiles_manager->tileSize().width());
-    auto h = tiles_manager->tileSize().height() * m_field->y() +
+    auto h = tiles_manager->tileSize().height() * m_field->m_y +
             (tiles_manager->baseSize().height() - tiles_manager->tileSize().height());
     auto rect = QRectF(0, 0, w, h);
 
-    // Это и есть размер поля
+    // Это и есть размер поля, начинается с (0,0)
     setSceneRect(rect);
 
     // m_field_rect - это поле плюс margins, т.е. то, что должно входить в экран
@@ -106,6 +121,7 @@ void CScene::newGame()
     // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
     m_message_font_pixel = static_cast<int>(m_message_rect.height() * 0.07);
 }
+
 
 // ------------------------------------------------------------------------------------------------
 // Выделить или не выделить плитку
@@ -144,12 +160,12 @@ void CScene::hideMessage(bool is_show_tiles)
 // Показать hint
 void CScene::showHint()
 {
-    if (m_is_path) return;
+    if (m_path_type != ptNone) return;
 
     clearSelected();
     // В m_field.path() лежит текущая подсказка
-    m_is_hint = true;
-    slotStartConnect(m_field->hintTiles());
+    m_path_type = ptHint;
+    doStartPath(m_field->m_hint_tiles);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -157,7 +173,7 @@ void CScene::showHint()
 void CScene::mouseLeft(QPointF point)
 {
     // Если перерисовывается путь - мышь недоступна
-    if (m_is_path) return;
+    if (m_path_type != ptNone) return;
 
     // Получим костяшку по координатам
     auto tile = getTileIndex(point);
@@ -198,7 +214,7 @@ void CScene::mouseLeft(QPointF point)
 // Нажата правая клавиша мыши
 void CScene::mouseRight(QPointF point)
 {
-    if (m_is_path) return;
+    if (m_path_type != ptNone) return;
 
     clearSelected();
 
@@ -206,7 +222,7 @@ void CScene::mouseRight(QPointF point)
     if (tile.x() == -1) return;
 
     auto curr_type = m_field->getTileType(tile);
-    for (int i = 0; i < m_field->tilesCount(); ++i) {
+    for (int i = 0; i < m_field->m_tiles_count; ++i) {
         if (m_field->getTileType(i) == curr_type)
             addSelected(m_field->getTile(i));
     }
@@ -225,7 +241,7 @@ void CScene::drawForeground(QPainter *painter, const QRectF &)
 {
     if (!m_message.isEmpty())
         paintMessage(painter);
-    if (m_is_path)
+    if (m_path_type != ptNone)
         paintPath(painter);
 }
 
@@ -234,7 +250,10 @@ void CScene::drawForeground(QPainter *painter, const QRectF &)
 void CScene::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == m_path_timer) {
-        doTimerPath();
+        doFinishPath();
+    }
+    if (event->timerId() == m_demostration_timer) {
+        doDemonstration();
     }
 }
 
@@ -324,34 +343,6 @@ void CScene::addSelected(const Tile &tile)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Окончание таймера пути
-void CScene::doTimerPath()
-{
-    killTimer(m_path_timer);
-    m_path_timer = -1;
-    m_is_path = false;
-
-    // Сказать board'у перерисовать путь
-    emit signalPaintPath();
-
-    if (!m_is_hint) {
-        m_field->path().clear();
-
-        // Удалить костяшки
-        removeTiles(m_deleted_tiles);
-
-        // Проверим состояние программы
-        auto result = m_field->getGameStatus();
-        if (result == vsNotVariant || result == vsVictory)
-            emit signalVariantStatus(result);
-    } else
-        m_is_hint = false;
-
-    // Статусная строка
-    //    emit signalUpdateInfo();
-}
-
-// ------------------------------------------------------------------------------------------------
 // Нарисовать путь
 void CScene::paintPath(QPainter *painter)
 {
@@ -366,24 +357,75 @@ void CScene::paintPath(QPainter *painter)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Поле сказало, что нужно удалить костяшки
-void CScene::slotStartConnect(const TilePair &tiles)
+// Запустить таймер рисования пути
+void CScene::doStartPath(const TilePair &tiles)
 {
-    m_selected.clear();
+    // Формируем путь
+    m_path_coords.clear();
+    // Сформируем список Rect в координатах сцены, которые нужно перерисовать
+    for (int i = 0; i < m_field->m_path.size(); ++i)
+        m_path_coords.append(getTileCenter(m_field->m_path[i]));
 
     // Сохраним костяшки и запустим таймер
     m_deleted_tiles = tiles;
-    m_is_path = true;
     m_path_timer = startTimer(settings->timeDelay());
 
-    m_path_coords.clear();
-    // Сформируем список Rect в координатах сцены, которые нужно перерисовать
-    for (int i = 0; i < m_field->path().size(); ++i)
-        m_path_coords.append(getTileCenter(m_field->path()[i]));
+    // Сказать board'у перерисовать путь
+    emit signalPaintPath();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Окончание таймера пути
+void CScene::doFinishPath()
+{
+    m_selected.clear();
+
+    Q_ASSERT(m_path_timer != -1);
+    killTimer(m_path_timer);
+    m_path_timer = -1;
 
     // Сказать board'у перерисовать путь
     emit signalPaintPath();
 
+    // Для окончания снятия костяшек
+    if (m_path_type == ptPath) {
+        m_field->m_path.clear();
+
+        // Удалить костяшки
+        removeTiles(m_deleted_tiles);
+
+        // Проверим состояние программы
+        auto result = m_field->getGameStatus();
+        if (result == vsNotVariant || result == vsVictory)
+            emit signalVariantStatus(result);
+
+        m_path_type = ptNone;
+    }
+
+    // Для подсказки
+    if (m_path_type == ptHint) {
+        m_path_type = ptNone;
+        // Сказать board'у перерисовать путь
+        emit signalPaintPath();
+    }
+
+    // Для демонстрации PathType не меняется
+
+    // Статусная строка
+    //    emit signalUpdateInfo();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Поле сказало, что нужно удалить костяшки
+void CScene::slotStartConnect(const TilePair &tiles)
+{
+    m_path_type = ptPath;
+
+    // Выделить вторую костяшку
+    addSelected(tiles.second);
+
+    // Стартуем показ пути
+    doStartPath(tiles);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -417,7 +459,7 @@ void CScene::columnMoveDown(const Tile &tile)
 {
     auto index = m_field->getIndex(tile);
     forever {
-        auto up_index = index - m_field->x();
+        auto up_index = index - m_field->m_x;
         // Смещаем
         if (up_index < 0 || !m_tiles_list[up_index]) break;
         // Переместим позицию и ZValue
@@ -426,8 +468,81 @@ void CScene::columnMoveDown(const Tile &tile)
         // Изменение в поле
         m_tiles_list[index] = m_tiles_list[up_index];
         m_tiles_list[up_index] = nullptr;
-        index -= m_field->x();
+        index -= m_field->m_x;
     }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Демонстрация (по таймеру)
+void CScene::doDemonstration()
+{
+    auto tiles = m_field->m_right_pathes[m_demostration_index];
 
+    // Старый путь
+    if (m_demostration_index > 0) {
+        m_field->m_path.clear();
+        m_path_coords = m_old_path_coords;
+        // Сказать board'у перерисовать путь
+        emit signalPaintPath();
+        // Снимем ячейки
+        clearDemostrationTiles(m_field->m_right_pathes[m_demostration_index-1]);
+    }
+
+    // Находим путь
+    m_field->checkConnect(m_field->m_tiles, tiles);
+
+    // Формируем путь из m_field->m_path
+    m_path_coords.clear();
+    // Сформируем список Rect в координатах сцены, которые нужно перерисовать
+    for (int i = 0; i < m_field->m_path.size(); ++i)
+        m_path_coords.append(getTileCenter(m_field->m_path[i]));
+    m_old_path_coords = m_path_coords;
+    // Сказать board'у перерисовать путь
+    emit signalPaintPath();
+
+    // Проверка окончания
+    ++m_demostration_index;
+        if (m_demostration_index == m_field->m_right_pathes.size()) {
+        closeDemonstration();
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Снять костяшки для демонстрации
+void CScene::clearDemostrationTiles(const TilePair &tiles)
+{
+    // Снимем в поле
+    m_field->clearTiles(m_field->m_tiles, tiles);
+    // Снимем в сцене
+    removeTiles(tiles);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CScene::closeDemonstration()
+{
+    // Очистить поле
+    m_field->m_tiles.clear();
+    clear();
+
+    // Убрать путь
+    m_field->m_path.clear();
+    m_path_coords.clear();
+    emit signalPaintPath();
+
+    Q_ASSERT(m_demostration_timer != -1);
+    killTimer(m_demostration_timer);
+    m_demostration_timer = -1;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Начать демонстрацию
+void CScene::startDemonstration()
+{
+    m_path_type = ptDemostration;
+
+    // Текущий номер демонстрации - индекс в массиве m_field->m_right_pathes
+    m_demostration_index = 0;
+
+    // Запускаем таймер демонстрации
+    m_demostration_timer = startTimer(settings->timeDelay());
+}

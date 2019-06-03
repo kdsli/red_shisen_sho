@@ -56,6 +56,7 @@ public slots:
 protected:
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
 
 private:
     GameState m_game_state;
@@ -64,6 +65,10 @@ private:
     CScene *m_scene;
     // Данные типов игр
     QHash<GameType, FieldRec> m_field_types;
+    // Таймер игры
+    int m_game_timer;
+    // Секунды игры
+    int m_seconds;
 
     // Пересчитать view (вызвается при инициализации и каждом изменении размера)
     void recalcView();
@@ -73,6 +78,7 @@ private:
     void clickRightButton(QMouseEvent *);
 
     // Ситуации в игре
+    void doNewGame();
     void doVictory();
     void doNotVariant();
 
@@ -81,6 +87,8 @@ private:
 
     // Начать демонстрацию
     void startDemonstration();
+
+    void stopGameTimer();
 
 private slots:
     void slotRepaintPath();
