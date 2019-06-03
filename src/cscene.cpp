@@ -122,7 +122,7 @@ void CScene::recalcScene()
     m_field_rect.setHeight(m_field_rect.height() * 1.1);
 
     // Рассчитаем прямоугольник сообщения
-    m_message_rect = QRectF(0, 0, m_field_rect.width() * 0.6, m_field_rect.height() * 0.6);
+    m_message_rect = QRectF(0, 0, m_field_rect.width() * 0.7, m_field_rect.height() * 0.7);
     // Центрируем прямоугольник
     m_message_rect.moveCenter(QPointF(width() / 2, height() / 2));
     // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
