@@ -43,8 +43,12 @@ void CKeeperSettings::doExit(QObject *obj)
 {
     auto widget = qobject_cast<QWidget *>(obj);
     beginGroup(GEOMETRY_GROUP);
-    auto rect = QRect(widget->pos(), widget->size());
-    setValue(widget->objectName(), rect);
+    if (widget->inherits("QMainWindow")) {
+        auto rect = QRect(widget->pos(), widget->size());
+        setValue(widget->objectName(), rect);
+    } else {
+        setValue(widget->objectName(), widget->saveGeometry());
+    }
     endGroup();
 }
 
@@ -58,9 +62,16 @@ void CKeeperSettings::registerGeometry(QWidget *widget)
 
     // Прочитаем состояние геометрии окна
     beginGroup(GEOMETRY_GROUP);
-    auto rect = value(widget->objectName(), QApplication::primaryScreen()->availableGeometry()).toRect();
-    widget->resize(rect.size());
-    widget->move(rect.topLeft());
+    if (widget->inherits("QMainWindow")) {
+        auto rect = value(widget->objectName());
+        if (!rect.isValid())
+            rect = QApplication::primaryScreen()->availableGeometry();
+        widget->resize(rect.toRect().size());
+        widget->move(rect.toRect().topLeft());
+    } else {
+        widget->restoreGeometry(value(widget->objectName(), widget->geometry()).toByteArray());
+    }
+
     endGroup();
 }
 
