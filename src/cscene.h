@@ -64,8 +64,12 @@ private:
 
     QPixmap m_bg_pixmap;
     CField *m_field;
-    // Rect поля (костяшки + margins)
+    // Размер поля (только костяшки)
+    QSizeF m_tiles_size;
+    // Размер поля (только костяшки + тень)
     QRectF m_field_rect;
+    // Rect поля (костяшки + тень + margins)
+    QRectF m_viewport_rect;
     // Список костяшек
     QVector<QGraphicsSvgItem *> m_tiles_list;
     // Сообщение
@@ -137,6 +141,9 @@ private:
     void doDemonstration();
     void clearDemostrationTiles(const TilePair &tiles);
     void closeDemonstration();
+
+    // Шаманство с координатами линий, чтобы не сильно уходили за границу поля
+    void correctPoint(QPointF &point) const;
 
 private slots:
     void slotStartConnect(const TilePair &tiles);

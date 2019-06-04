@@ -155,9 +155,10 @@ void CRecordsManager::saveRecords()
 
     // Общее количество игр
     buffer << m_records.size();
-    for (auto it = m_records.keyValueBegin(); it != m_records.keyValueEnd(); ++it) {
-        auto key = (*it).first;
-        auto &list = (*it).second;
+    // keyValueBegin - since QT5.10
+    for (auto it = m_records.keyBegin(); it != m_records.keyEnd(); ++it) {
+        auto key = *it;
+        auto &list = m_records[*it];
         // За каждую игру записать индекс игры и количество записей
         buffer << key << list.size();
         // И дальше все записи

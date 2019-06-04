@@ -1,5 +1,5 @@
 #SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM TRUE)
-cmake_minimum_required (VERSION 3.14.0)
+cmake_minimum_required (VERSION 3.10.0)
 
 find_package(Qt5LinguistTools CONFIG REQUIRED)
 

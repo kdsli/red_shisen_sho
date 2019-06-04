@@ -105,24 +105,26 @@ QGraphicsSvgItem *CScene::createTile(int n, QPointF point, const QString &elemen
 // Прересчитать логические координаты сцены
 void CScene::recalcScene()
 {
+    // Размеры поля костяшек (без тени)
+    m_tiles_size = QSizeF(tiles_manager->tileSize().width() * m_field->m_x,
+                          tiles_manager->tileSize().height() * m_field->m_y);
+
     // Реальная ширина/высота поля с учетом тени последних костяшек
-    auto w = tiles_manager->tileSize().width() * m_field->m_x +
-            (tiles_manager->baseSize().width() - tiles_manager->tileSize().width());
-    auto h = tiles_manager->tileSize().height() * m_field->m_y +
-            (tiles_manager->baseSize().height() - tiles_manager->tileSize().height());
-    auto rect = QRectF(0, 0, w, h);
+    auto w =  m_tiles_size.width() + tiles_manager->baseSize().width() - tiles_manager->tileSize().width();
+    auto h =  m_tiles_size.height() + tiles_manager->baseSize().height() - tiles_manager->tileSize().height();
+    auto m_field_rect = QRectF(0, 0, w, h);
 
     // Это и есть размер поля, начинается с (0,0)
-    setSceneRect(rect);
+    setSceneRect(m_field_rect);
 
     // m_field_rect - это поле плюс margins, т.е. то, что должно входить в экран
     // при масштабировании. Больше SceneRect на 10%
-    m_field_rect = rect;
-    m_field_rect.setWidth(m_field_rect.width() * 1.1);
-    m_field_rect.setHeight(m_field_rect.height() * 1.1);
+    m_viewport_rect = m_field_rect;
+    m_viewport_rect.setWidth(m_viewport_rect.width() * 1.1);
+    m_viewport_rect.setHeight(m_viewport_rect.height() * 1.1);
 
     // Рассчитаем прямоугольник сообщения
-    m_message_rect = QRectF(0, 0, m_field_rect.width() * 0.7, m_field_rect.height() * 0.7);
+    m_message_rect = QRectF(0, 0, m_viewport_rect.width() * 0.7, m_viewport_rect.height() * 0.7);
     // Центрируем прямоугольник
     m_message_rect.moveCenter(QPointF(width() / 2, height() / 2));
     // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
@@ -358,8 +360,24 @@ void CScene::paintPath(QPainter *painter)
     pen.setCapStyle(Qt::RoundCap);
 
     painter->setPen(pen);
-    for (int i = 0; i < m_path_coords.size() - 1; ++i)
+    for (int i = 0; i < m_path_coords.size() - 1; ++i) {
+        // Шаманим с координатами, чтобы они не сильно вылезали за границу
+        correctPoint(m_path_coords[i]);
+        correctPoint(m_path_coords[i+1]);
         painter->drawLine(m_path_coords[i], m_path_coords[i + 1]);
+    }
+}
+
+// ================================================================================================
+// Шаманство с координатами линий, чтобы не сильно уходили за границу поля
+void CScene::correctPoint(QPointF &point) const
+{
+    // Примерно треть костяшки по ширине для граничных костяшек
+    auto offset = tiles_manager->tileSize().width() / 3;
+    if (point.x() < 0) point.setX(-offset);
+    if (point.x() > m_tiles_size.width()) point.setX(m_tiles_size.width() + offset);
+    if (point.y() < 0) point.setY(-offset);
+    if (point.y() > m_tiles_size.height()) point.setY(m_tiles_size.height() + offset);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -177,7 +177,7 @@ void CBoard::timerEvent(QTimerEvent *event)
 // Пересчитать view (вызвается при инициализации и каждом изменении размера)
 void CBoard::recalcView()
 {
-    fitInView(m_scene->m_field_rect, Qt::KeepAspectRatio);
+    fitInView(m_scene->m_viewport_rect, Qt::KeepAspectRatio);
 }
 
 // ------------------------------------------------------------------------------------------------
