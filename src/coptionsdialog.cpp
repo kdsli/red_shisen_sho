@@ -6,6 +6,7 @@
 #include "ctilesmanager.h"
 
 #include <QDir>
+#include <QDesktopWidget>
 
 COptionsDialog::COptionsDialog(QWidget *parent) :
     QDialog(parent),
@@ -14,6 +15,10 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
     m_time_delay_slider(nullptr)
 {
     ui->setupUi(this);
+
+//    auto rect = geometry();
+//    rect.moveCenter(QApplication::desktop()->availableGeometry().center());
+//    setGeometry(rect);
 
     settings->registerGeometry(this);
 

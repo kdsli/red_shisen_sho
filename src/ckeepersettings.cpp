@@ -2,7 +2,7 @@
 
 #include <QDir>
 #include <QMainWindow>
-#include <QScreen>
+#include <QDesktopWidget>
 #include <QApplication>
 
 static const QString GEOMETRY_GROUP = "Geometry";
@@ -30,7 +30,7 @@ private:
 
 bool CWidgetEventFilter::eventFilter(QObject *obj, QEvent *event)
 {
-    if (event->type() == QEvent::Close || event->type() == QEvent::HideToParent) {
+    if (event->type() == QEvent::Close) {
         (m_keeper->*m_exit_proc)(obj);
         event->accept();
     }
@@ -43,12 +43,10 @@ void CKeeperSettings::doExit(QObject *obj)
 {
     auto widget = qobject_cast<QWidget *>(obj);
     beginGroup(GEOMETRY_GROUP);
-    if (widget->inherits("QMainWindow")) {
-        auto rect = QRect(widget->pos(), widget->size());
-        setValue(widget->objectName(), rect);
-    } else {
+    if (qobject_cast<QMainWindow *>(widget))
+        setValue(widget->objectName(), widget->geometry());
+    else
         setValue(widget->objectName(), widget->saveGeometry());
-    }
     endGroup();
 }
 
@@ -62,16 +60,17 @@ void CKeeperSettings::registerGeometry(QWidget *widget)
 
     // Прочитаем состояние геометрии окна
     beginGroup(GEOMETRY_GROUP);
-    if (widget->inherits("QMainWindow")) {
-        auto rect = value(widget->objectName());
+    if (qobject_cast<QMainWindow *>(widget)) {
+        auto rect = value(widget->objectName()).toRect();
+        // Для главного окна если ничего не прочитали - расширяем на весь экран
         if (!rect.isValid())
-            rect = QApplication::primaryScreen()->availableGeometry();
-        widget->resize(rect.toRect().size());
-        widget->move(rect.toRect().topLeft());
+            widget->setWindowState(Qt::WindowMaximized);
+        else
+            widget->setGeometry(rect);
     } else {
-        widget->restoreGeometry(value(widget->objectName(), widget->geometry()).toByteArray());
+        widget->restoreGeometry(value(widget->objectName()).toByteArray());
     }
-
     endGroup();
 }
+
 

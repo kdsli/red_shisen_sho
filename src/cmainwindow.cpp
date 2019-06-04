@@ -20,6 +20,8 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 {
     ui->setupUi(this);
 
+    settings->registerGeometry(this);
+
     // Инициализация менеджеров костяшек, фонов, рекордов
     tiles_manager = new CTilesManager(this);
     bg_manager = new CBackgroundManager(this);
@@ -36,8 +38,6 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     slotTrainingChange();
 
     createBoard();
-
-    settings->registerGeometry(this);
 }
 
 CMainWindow::~CMainWindow()
