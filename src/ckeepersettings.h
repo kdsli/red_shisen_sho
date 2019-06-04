@@ -15,6 +15,8 @@ public:
 
 private:
     void doExit(QObject *obj);
+
+    QString writeGeometry(QWidget);
 };
 
 #endif // CKEEPERSETTINGS_H
