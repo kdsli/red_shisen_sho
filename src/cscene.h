@@ -29,6 +29,7 @@ public:
     // Показать/скрыть сообщение
     void showMessage(const QString &message, bool is_hide_tiles = false);
     void hideMessage(bool is_show_tiles);
+    void clearMessage() { m_message.clear(); }
 
     // Показать hint
     void showHint();

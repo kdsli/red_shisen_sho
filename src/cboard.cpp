@@ -55,9 +55,6 @@ void CBoard::createScene()
     connect(m_scene, &CScene::signalVariantStatus, this, &CBoard::slotVariantStatus);
     connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
 
-    connect(this, &CBoard::signalUndo, this, &CBoard::slotUndo);
-    connect(this, &CBoard::signalRedo, this, &CBoard::slotRedo);
-
     slotNewGame();
 }
 
@@ -91,6 +88,7 @@ void CBoard::slotRepeatGame()
 void CBoard::doNewGame()
 {
     m_game_state = gsNormal;
+    m_scene->clearMessage();
     m_is_cunning = false;
 
     // Заполним сцену новыми значениями
@@ -108,6 +106,7 @@ void CBoard::doNewGame()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotHint()
 {
+    if (m_game_state != gsNormal) return;
     // Скажем сцене поместить в путь
     m_scene->showHint();
     m_is_cunning = true;
@@ -245,6 +244,7 @@ void CBoard::slotVariantStatus(VariantStatus status)
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotUndo()
 {
+    if (m_game_state != gsNormal) return;
     m_is_cunning = true;
     m_scene->slotUndo();
 }
@@ -252,6 +252,7 @@ void CBoard::slotUndo()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotRedo()
 {
+    if (m_game_state != gsNormal) return;
     m_is_cunning = true;
     m_scene->slotRedo();
 }

@@ -57,8 +57,8 @@ void CMainWindow::createBoard()
     connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHint);
     connect(ui->acPause, &QAction::triggered, m_board, &CBoard::slotPause);
 
-    connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::signalUndo);
-    connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::signalRedo);
+    connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::slotUndo);
+    connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::slotRedo);
 
     connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
     connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);

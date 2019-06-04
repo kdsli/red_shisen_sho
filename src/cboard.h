@@ -41,8 +41,6 @@ signals:
     void signalUpdateInfo();
     void signalUndoRedo(bool, bool);
     void signalShowResult(int);
-    void signalUndo();
-    void signalRedo();
 
 public slots:
     void slotNewGame();
@@ -52,6 +50,8 @@ public slots:
     void slotNewTypeGame();
     void slotSetTileset();
     void slotSetBackground();
+    void slotUndo();
+    void slotRedo();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -99,8 +99,6 @@ private:
 private slots:
     void slotRepaintPath();
     void slotVariantStatus(VariantStatus);
-    void slotUndo();
-    void slotRedo();
 };
 
 #endif // CBOARD_H
