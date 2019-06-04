@@ -5,8 +5,6 @@
 #include <QScreen>
 #include <QApplication>
 
-#include <QDebug>
-
 static const QString GEOMETRY_GROUP = "Geometry";
 
 // Тип указателя на метод класса
@@ -45,7 +43,8 @@ void CKeeperSettings::doExit(QObject *obj)
 {
     auto widget = qobject_cast<QWidget *>(obj);
     beginGroup(GEOMETRY_GROUP);
-    setValue(widget->objectName(), widget->saveGeometry());
+    auto rect = QRect(widget->pos(), widget->size());
+    setValue(widget->objectName(), rect);
     endGroup();
 }
 
@@ -59,7 +58,9 @@ void CKeeperSettings::registerGeometry(QWidget *widget)
 
     // Прочитаем состояние геометрии окна
     beginGroup(GEOMETRY_GROUP);
-    widget->restoreGeometry(value(widget->objectName()).toByteArray());
+    auto rect = value(widget->objectName(), QApplication::primaryScreen()->availableGeometry()).toRect();
+    widget->resize(rect.size());
+    widget->move(rect.topLeft());
     endGroup();
 }
 
