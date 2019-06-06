@@ -87,6 +87,8 @@ void CBoard::slotRepeatGame()
 // Новая игра
 void CBoard::doNewGame()
 {
+    if (m_game_state == gsDemostration) return;
+
     m_game_state = gsNormal;
     m_scene->clearMessage();
     m_is_cunning = false;
@@ -192,6 +194,7 @@ void CBoard::clickLeftButton(QMouseEvent *event)
         break;
     case gsDemostration:
         m_scene->closeDemonstration();
+        m_game_state = gsEmpty;
         break;
     case gsNotVariants:
         startDemonstration();
