@@ -205,7 +205,7 @@ void CBoard::recalcView()
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
     // Если перерисовывается путь - мышь недоступна
-    if (m_path_type != ptNone) return;
+    if (m_path_type == ptPath || m_path_type == ptHint) return;
 
     switch (m_game_state) {
     case gsNormal:
@@ -216,7 +216,6 @@ void CBoard::clickLeftButton(QMouseEvent *event)
         break;
     case gsDemostration:
         closeDemonstration();
-        m_game_state = gsEmpty;
         break;
     case gsNotVariants:
         startDemonstration();
@@ -529,6 +528,9 @@ void CBoard::closeDemonstration()
     m_demostration_timer = -1;
 
     m_scene->m_path_coords.clear();
+    m_scene->clear();
+    m_field->m_tiles.fill(-1);
+    viewport()->update();
 
     m_game_state = gsEmpty;
 
