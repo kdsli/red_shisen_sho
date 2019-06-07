@@ -57,8 +57,13 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
+    void drawBackground(QPainter *painter, const QRectF &rect) override;
+    void drawForeground(QPainter *painter, const QRectF &rect) override;
 
 private:
+    // Тип пути, который показывается в настоящее время
+    enum PathType {ptNone, ptPath, ptHint, ptDemostration};
+
     GameState m_game_state;
     GameState m_prev_pause_state;
     CField *m_field;
@@ -67,10 +72,26 @@ private:
     QHash<GameType, FieldRec> m_field_types;
     // Таймер игры
     int m_game_timer;
+    // Таймер пути
+    int m_path_timer;
+    // Таймер демонстрации
+    int m_demostration_timer;
     // Секунды игры
     int m_seconds;
+    // Текущий тип пути
+    PathType m_path_type{ptNone};
     // Использовались ли хитрости
     bool m_is_cunning;
+    // Сообщение
+    QString m_message;
+    // Размеры прямоугольника сообщений
+    QRectF m_message_rect;
+    // Размер шрифта сообщения в пикселях
+    int m_message_font_pixel;
+    // Текущий индекс демонстрции
+    int m_demostration_index;
+    // Старый путь (для демонстрации)
+    CoordList m_old_path_coords;
 
     // Пересчитать view (вызвается при инициализации и каждом изменении размера)
     void recalcView();
@@ -84,11 +105,20 @@ private:
     void doVictory();
     void doNotVariant();
 
+    // Нарисовать путь
+    void paintPath(QPainter *painter);
+    void repaintPath();
+
+    // Запустить таймер рисования пути
+    void doStartPath(const TilePair &tiles);
+    // Окончание таймера пути
+    void doFinishPath();
+
+    // Показать hint
+    void showHint();
+
     // Проверить и показать результаты
     void checkResult();
-
-    // Начать демонстрацию
-    void startDemonstration();
 
     // Остановить таймер игры
     void stopGameTimer();
@@ -96,9 +126,22 @@ private:
     // Секунды в строку
     QString getSecondsString();
 
+    // Нарисовать окно сообщений
+    void paintMessage(QPainter *painter) const;
+
+    // Показать/скрыть сообщение
+    void showMessage(const QString &message, bool is_hide_tiles = false);
+    void hideMessage(bool is_show_tiles);
+
+    // Демонстрация
+    void startDemonstration();
+    void doDemonstration();
+    void clearDemostrationTiles(const TilePair &tiles);
+    void closeDemonstration();
+
 private slots:
-    void slotRepaintPath();
-    void slotVariantStatus(VariantStatus);
+    void slotStartConnect(const TilePair &tiles);
+
 };
 
 #endif // CBOARD_H

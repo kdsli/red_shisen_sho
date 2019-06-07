@@ -3,13 +3,6 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5Svg CONFIG REQUIRED)
 find_package(Qt5LinguistTools CONFIG REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
-find_package(OpenGL REQUIRED)
-
-if (${Qt5OpenGL_FOUND})
-    message("Found Qt5OpenGL")
-    add_definitions(-DDEFINED_OPENGL)
-endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -53,9 +46,13 @@ add_executable(
     ${HEADER_FILES}
     ${UI_FILES}
     ${RESOURCES}
-    ${QM_FILES}
+#    ${QM_FILES}
     ${OUTPUT_FILE}
 )
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Svg ${Qt5OpenGL_LIBRARIES})
+target_link_libraries(
+    ${PROJECT_NAME}
+    Qt5::Widgets
+    Qt5::Svg
+)
 

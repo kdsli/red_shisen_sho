@@ -48,6 +48,9 @@ public:
     qreal shadowWidht() const { return m_shadow_width; }
     qreal shadowHeight() const { return m_shadow_height; }
 
+    // Толщина линии пути
+    int pathLineSize() const { return m_path_line_size; }
+
 signals:
     void signalChangeTilesets();
 
@@ -64,6 +67,8 @@ private:
     QSizeF m_tile_size;
     // Ширина и высота тени костяшки
     qreal m_shadow_width, m_shadow_height;
+    // Толщина линии пути
+    int m_path_line_size;
 
     void addTileSeries(const QString &series_name, int count);
 

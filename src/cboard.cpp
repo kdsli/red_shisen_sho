@@ -5,10 +5,6 @@
 #include "ctilesmanager.h"
 #include "crecordsmanager.h"
 
-#ifdef DEFINED_OPENGL
-#include <QtOpenGL/QGLWidget>
-#endif
-
 #include <QResizeEvent>
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
@@ -33,15 +29,9 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field_types.insert(fz30x16, {30, 16, 12});
 
     connect(m_field, &CField::signalStatusUndoRedo, this, &CBoard::signalUndoRedo);
+    connect(m_field, &CField::signalStartConnect, this, &CBoard::slotStartConnect);
 
-#ifdef DEFINED_OPENGL
-    // Paranoia...
-    try {
-        auto gl_widget = new QGLWidget(QGLFormat(QGL::DoubleBuffer));
-        if (gl_widget) setViewport(gl_widget);
-    } catch (...) {
-    }
-#endif
+    setCacheMode(QGraphicsView::CacheBackground);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -51,8 +41,6 @@ void CBoard::createScene()
     m_scene->setBackground(bg_manager->currentFile());
     setScene(m_scene);
 
-    connect(m_scene, &CScene::signalPaintPath, this, &CBoard::slotRepaintPath);
-    connect(m_scene, &CScene::signalVariantStatus, this, &CBoard::slotVariantStatus);
     connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
 
     slotNewGame();
@@ -90,7 +78,8 @@ void CBoard::doNewGame()
     if (m_game_state == gsDemostration) return;
 
     m_game_state = gsNormal;
-    m_scene->clearMessage();
+    m_path_type = ptNone;
+    m_message.clear();
     m_is_cunning = false;
 
     // Заполним сцену новыми значениями
@@ -109,8 +98,7 @@ void CBoard::doNewGame()
 void CBoard::slotHint()
 {
     if (m_game_state != gsNormal) return;
-    // Скажем сцене поместить в путь
-    m_scene->showHint();
+    showHint();
     m_is_cunning = true;
 }
 
@@ -118,11 +106,11 @@ void CBoard::slotHint()
 void CBoard::slotPause()
 {
     if (m_game_state != gsPause) {
-        m_scene->showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
+        showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
         m_prev_pause_state = m_game_state;
         m_game_state = gsPause;
     } else {
-        m_scene->hideMessage(true);
+        hideMessage(true);
         m_game_state = m_prev_pause_state;
     }
 }
@@ -173,6 +161,29 @@ void CBoard::timerEvent(QTimerEvent *event)
             emit signalUpdateInfo();
         }
     }
+    if (event->timerId() == m_path_timer) {
+        doFinishPath();
+    }
+    if (event->timerId() == m_demostration_timer) {
+        doDemonstration();
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нарисовать фон
+void CBoard::drawBackground(QPainter *painter, const QRectF &rect)
+{
+    painter->drawPixmap(rect, m_scene->m_bg_pixmap, m_scene->m_bg_pixmap.rect());
+}
+
+// ------------------------------------------------------------------------------------------------
+// Все что поверх фона
+void CBoard::drawForeground(QPainter *painter, const QRectF &)
+{
+    if (!m_message.isEmpty())
+        paintMessage(painter);
+    if (m_path_type != ptNone)
+        paintPath(painter);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -180,11 +191,22 @@ void CBoard::timerEvent(QTimerEvent *event)
 void CBoard::recalcView()
 {
     fitInView(m_scene->m_viewport_rect, Qt::KeepAspectRatio);
+
+    // Рассчитаем прямоугольник сообщения
+    m_message_rect = QRectF(0, 0, m_scene->m_field_rect.width() * 0.7, m_scene->m_field_rect.height() * 0.7);
+    // Центрируем прямоугольник
+    m_message_rect.moveCenter(m_scene->m_field_rect.center());
+    // Размер шрифта сообщения в пискелах. Думаю, процентов 7 от высоты
+    m_message_font_pixel = static_cast<int>(m_message_rect.height() * 0.07);
+
 }
 
 // ------------------------------------------------------------------------------------------------
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
+    // Если перерисовывается путь - мышь недоступна
+    if (m_path_type != ptNone) return;
+
     switch (m_game_state) {
     case gsNormal:
         m_scene->mouseLeft(mapToScene(event->pos()));
@@ -193,7 +215,7 @@ void CBoard::clickLeftButton(QMouseEvent *event)
         slotPause();
         break;
     case gsDemostration:
-        m_scene->closeDemonstration();
+        closeDemonstration();
         m_game_state = gsEmpty;
         break;
     case gsNotVariants:
@@ -212,36 +234,6 @@ void CBoard::clickRightButton(QMouseEvent *event)
 {
     // Отдадим нажатие сцене
     if (settings->isTraining()) m_scene->mouseRight(mapToScene(event->pos()));
-}
-
-// ------------------------------------------------------------------------------------------------
-// Отобразить путь
-void CBoard::slotRepaintPath()
-{
-    if (m_field->m_path.isEmpty()) return;
-
-    QRegion region;
-
-    auto prev_coord = mapFromScene(m_field->m_path[0]);
-    for (int i = 1; i < m_field->m_path.size(); ++i) {
-        auto coord = mapFromScene(m_field->m_path[i]);
-        auto rect = QRectF(prev_coord, coord).normalized();
-        rect.adjust(-1, -1, 1, 1);
-        region += rect.toRect();
-        prev_coord = coord;
-    }
-    viewport()->repaint(region);
-}
-
-// ------------------------------------------------------------------------------------------------
-// Поле показало, какие у него варианты
-// Получаются только vsVictory и vsNotVariant
-void CBoard::slotVariantStatus(VariantStatus status)
-{
-    if (status == vsVictory)
-        doVictory();
-    if (status == vsNotVariant)
-        doNotVariant();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -269,7 +261,7 @@ void CBoard::doVictory()
     QString s = tr("Вы выиграли за ") + getSecondsString() + "!";
     if (settings->isTraining() && !m_is_cunning)
         s += "\n" + tr("Вы не пользовались подсказками, пожалуй, мы занесем ваш результат в таблицу рекордов");
-    m_scene->showMessage(s);
+    showMessage(s);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -282,14 +274,121 @@ void CBoard::doNotVariant()
     QString s = tr("Игра зашла в тупик.") + "\n";
     if (settings->isDecision())
         s += tr("А вариант был - посмотрите демонстрацию.") + "\n";
-    m_scene->showMessage(s + tr("Щелкните для продолжения..."));
+    showMessage(s + tr("Щелкните для продолжения..."));
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нарисовать путь
+void CBoard::paintPath(QPainter *painter)
+{
+    QPen pen(Qt::red);
+    pen.setWidth(tiles_manager->pathLineSize());
+    pen.setCapStyle(Qt::RoundCap);
+    painter->setPen(pen);
+
+    // Выводим в координатах сцены
+    for (int i = 0; i < m_scene->m_path_coords.size() - 1; ++i) {
+        painter->drawLine(m_scene->m_path_coords[i], m_scene->m_path_coords[i + 1]);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Готовим регион отображения пути. Вообще-то не обязательно, ибо двойная буферизация все равно не
+// даст перерисовывать не измененные участки, но учет clip region даст возможный небольшой выигрыш
+// Ну и про перфекционизм не стоит забывать...
+void CBoard::repaintPath()
+{
+    Q_ASSERT_X(!m_scene->m_path_coords.isEmpty(), "CBoard::repaintPath", "m_scene->m_path_coords is not empty");
+
+    QRegion region;
+
+    // Для горизонтальных и вертикальных линий толщина будет нулевой. Вот на эту величину и будем увеличивать
+    auto delta = tiles_manager->pathLineSize();
+
+    // Регион в абсолютных координатах виджета
+    auto prev_coord = mapFromScene(m_scene->m_path_coords[0]);
+    for (int i = 1; i < m_scene->m_path_coords.size(); ++i) {
+        auto coord = mapFromScene(m_scene->m_path_coords[i]);
+        auto rect = QRectF(prev_coord, coord).normalized();
+        rect.adjust(-delta, -delta, delta, delta);
+        region += rect.toRect();
+        prev_coord = coord;
+    }
+    viewport()->update(region);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Запустить таймер рисования пути
+void CBoard::doStartPath(const TilePair &tiles)
+{
+    // Пусть сцена заполнит координаты своего пути
+    m_scene->setPathCoords();
+
+    repaintPath();
+
+    // Сохраним костяшки и запустим таймер
+    m_scene->m_deleted_tiles = tiles;
+    m_path_timer = startTimer(settings->timeDelay());
+}
+
+// ------------------------------------------------------------------------------------------------
+// Окончание таймера пути
+void CBoard::doFinishPath()
+{
+    m_scene->m_selected.clear();
+
+    Q_ASSERT(m_path_timer != -1);
+    killTimer(m_path_timer);
+    m_path_timer = -1;
+
+    // Для окончания снятия костяшек
+    if (m_path_type == ptPath) {
+
+        // Удалить костяшки
+        m_scene->removeTiles(m_scene->m_deleted_tiles);
+
+        repaintPath();
+
+        m_field->m_path.clear();
+
+        // Проверим состояние программы
+        auto status = m_field->getGameStatus();
+        if (status == vsVictory)
+            doVictory();
+        if (status == vsNotVariant)
+            doNotVariant();
+
+        m_path_type = ptNone;
+    }
+
+    // Для подсказки
+    if (m_path_type == ptHint) {
+        m_path_type = ptNone;
+        repaintPath();
+    }
+
+    // Статусная строка
+    emit signalUpdateInfo();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Показать hint
+void CBoard::showHint()
+{
+    if (m_path_type != ptNone) return;
+
+    m_scene->clearSelected();
+    // В m_scene.path() лежит текущая подсказка
+    m_path_type = ptHint;
+
+    doStartPath(m_field->m_hint_tiles);
 }
 
 // ------------------------------------------------------------------------------------------------
 void CBoard::checkResult()
 {
     m_game_state = gsEmpty;
-    m_scene->hideMessage(false);
+    hideMessage(false);
 
     int result = -1;
     if (!settings->isTraining() || !m_is_cunning)
@@ -302,17 +401,23 @@ void CBoard::checkResult()
 // Начать демонстрацию
 void CBoard::startDemonstration()
 {
-    m_scene->hideMessage(false);
+    hideMessage(false);
 
     // Вернуть на место поля и сцену
     m_field->restoreField();
     m_scene->fillScene();
+    m_scene->m_path_coords.clear();
 
     if (!settings->isDecision()) return;
 
     m_game_state = gsDemostration;
+    m_path_type = ptDemostration;
 
-    m_scene->startDemonstration();
+    // Текущий номер демонстрации - индекс в массиве m_field->m_right_pathes
+    m_demostration_index = 0;
+
+    m_demostration_timer = startTimer(settings->timeDelay());
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -331,5 +436,115 @@ QString CBoard::getSecondsString()
     t = t.addSecs(m_seconds);
 
     return t.toString("hh:mm:ss");
+}
+
+// ------------------------------------------------------------------------------------------------
+// Нарисовать окно сообщений
+void CBoard::paintMessage(QPainter *painter) const
+{
+    QPen pen(Qt::black);
+    pen.setWidth(2);
+    pen.setColor(Qt::white);
+    painter->setPen(pen);
+    painter->setBrush(QColor::fromRgb(50, 50, 50, 150));
+
+    painter->drawRoundedRect(m_message_rect, 10, 10);
+
+    QFont font;
+    font.setPixelSize(m_message_font_pixel);
+    painter->setFont(font);
+
+    QTextOption to;
+    to.setAlignment(Qt::AlignCenter);
+
+    painter->drawText(m_message_rect, m_message, to);
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::showMessage(const QString &message, bool is_hide_tiles)
+{
+    // Скрыть все плитки
+    if (is_hide_tiles) m_scene->setTilesVisible(false);
+    m_message = message;
+    viewport()->update();
+}
+
+// ------------------------------------------------------------------------------------------------
+void CBoard::hideMessage(bool is_show_tiles)
+{
+    m_scene->setTilesVisible(is_show_tiles);
+    m_message.clear();
+    viewport()->update();
+}
+
+// ------------------------------------------------------------------------------------------------
+// Демонстрация (по таймеру)
+void CBoard::doDemonstration()
+{
+    // Старый путь
+    if (m_demostration_index > 0) {
+        m_field->m_path.clear();
+        m_scene->m_path_coords = m_old_path_coords;
+        repaintPath();
+        // Снимем ячейки
+        clearDemostrationTiles(m_field->m_right_pathes[m_demostration_index-1]);
+    }
+
+    // Проверка окончания
+    if (m_demostration_index == m_field->m_right_pathes.size()) {
+        closeDemonstration();
+        return;
+    }
+
+    // Новый путь
+    auto tiles = m_field->m_right_pathes[m_demostration_index];
+    // Находим его
+    m_field->checkConnect(m_field->m_tiles, tiles);
+    // Формируем путь из m_field->m_path
+    m_scene->setPathCoords();
+    // Старые координаты в принципе не нужно сохранять, но так для верности
+    m_old_path_coords = m_scene->m_path_coords;
+
+    repaintPath();
+
+    ++m_demostration_index;
+}
+
+// ------------------------------------------------------------------------------------------------
+// Снять костяшки для демонстрации
+void CBoard::clearDemostrationTiles(const TilePair &tiles)
+{
+    // Снимем в поле
+    m_field->removeTiles(m_field->m_tiles, tiles);
+    // Снимем в сцене
+    m_scene->removeTiles(tiles);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Завершаем демонстрцию
+void CBoard::closeDemonstration()
+{
+    Q_ASSERT(m_demostration_timer != -1);
+    killTimer(m_demostration_timer);
+    m_demostration_timer = -1;
+
+    m_scene->m_path_coords.clear();
+
+    m_game_state = gsEmpty;
+
+    emit signalUndoRedo(false, false);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Поле сказало, что надо начинать удалять костяшки
+void CBoard::slotStartConnect(const TilePair &tiles)
+{
+    m_path_type = ptPath;
+
+    // Выделить вторую костяшку
+    m_scene->addSelected(tiles.second);
+
+    // Стартуем показ пути
+    doStartPath(tiles);
 }
 

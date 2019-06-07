@@ -130,6 +130,9 @@ void CTilesManager::initCurrentFile()
     // И размеры тени
     m_shadow_width = m_base_size.width() - m_tile_size.width();
     m_shadow_height = m_base_size.height() - m_tile_size.height();
+
+    // Толщина линии в 10% от высоты костяшки
+    m_path_line_size = static_cast<int>(m_tile_size.height() / 10);
 }
 
 // ------------------------------------------------------------------------------------------------
