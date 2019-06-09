@@ -27,6 +27,8 @@ public:
 
     // Проверка состояния игры (есть ли дальше варианты, достигнута ли победа)
     VariantStatus getGameStatus();
+    // Проверить активность undo/redo и отправить сигнал при изменении
+    void checkStatusUndoRedo();
 
     UndoItem doUndo();
     TilePair doRedo();
@@ -107,9 +109,6 @@ private:
     void removeTiles(Field &field, TilePair tiles);
     // Сдвинуть колонку вниз
     void columnMoveDown(Field &field, const Tile &);
-
-    // Проверить активность undo/redo и отправить сигнал при изменении
-    void checkStatusUndoRedo();
 
     // Сдвинуть колонку вверх (для Undo)
     void columnMoveUp(Tile tile);

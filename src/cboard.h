@@ -33,8 +33,6 @@ public:
     // Состояние игры
     enum GameState { gsEmpty, gsNormal, gsPause, gsVictory, gsNotVariants, gsDemostration };
 
-    void createScene();
-
     QString gameInfo();
 
 signals:
@@ -64,6 +62,7 @@ private:
     // Тип пути, который показывается в настоящее время
     enum PathType {ptNone, ptPath, ptHint, ptDemostration};
 
+    QPixmap m_bg_pixmap;
     GameState m_game_state;
     GameState m_prev_pause_state;
     CField *m_field;
@@ -92,6 +91,9 @@ private:
     int m_demostration_index;
     // Старый путь (для демонстрации)
     CoordList m_old_path_coords;
+
+    // Установить фоновое изображение
+    void setBackground(const QString &file_name);
 
     // Пересчитать view (вызвается при инициализации и каждом изменении размера)
     void recalcView();

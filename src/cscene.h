@@ -17,9 +17,6 @@ class CScene : public QGraphicsScene
 public:
     explicit CScene(CField *field, QObject *parent = nullptr);
 
-    // Установить фоновое изображение
-    void setBackground(const QString &file_name);
-
     // Новая игра
     void newGame();
 
@@ -47,7 +44,6 @@ public slots:
     void slotRedo();
 
 private:
-    QPixmap m_bg_pixmap;
     CField *m_field;
     // Размер поля (только костяшки)
     QSizeF m_tiles_size;

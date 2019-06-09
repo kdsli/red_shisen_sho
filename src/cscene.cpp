@@ -6,44 +6,12 @@
 #include "ctilesmanager.h"
 #include "cfield.h"
 
-#include <QFileInfo>
 #include <QSvgRenderer>
 #include <QTimerEvent>
 
 CScene::CScene(CField *field, QObject *parent) : QGraphicsScene(parent),
     m_field(field)
 {
-}
-
-// ------------------------------------------------------------------------------------------------
-// Установить изображение из файла
-void CScene::setBackground(const QString &file_name)
-{
-    if (!QFileInfo::exists(file_name)) {
-        settings->setDefaultBackground();
-    }
-
-    if (!QFileInfo::exists(file_name)) return;
-
-    QSize size;
-
-    if (bg_manager->isCurrentSvg()) {
-        // SVG item
-        QSvgRenderer bg_renderer(file_name);
-        QGraphicsSvgItem m_bg_svg;
-        m_bg_svg.setSharedRenderer(&bg_renderer);
-        size = m_bg_svg.boundingRect().size().toSize();
-        // Рисуем на Image
-        QImage img(size, QImage::Format_ARGB32_Premultiplied);
-        QPainter painter(&img);
-        bg_renderer.render(&painter);
-        // И сохраним как зависимый Pixmap
-        m_bg_pixmap = QPixmap::fromImage(img);
-    } else {
-        // Image item
-        QImage img(file_name);
-        m_bg_pixmap = QPixmap::fromImage(img);
-    }
 }
 
 // ------------------------------------------------------------------------------------------------

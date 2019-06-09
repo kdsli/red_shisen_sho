@@ -6,6 +6,7 @@
 #include "crecordsmanager.h"
 
 #include <QResizeEvent>
+#include <QFileInfo>
 
 CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     m_field(new CField(this)),
@@ -31,18 +32,18 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     connect(m_field, &CField::signalStatusUndoRedo, this, &CBoard::signalUndoRedo);
     connect(m_field, &CField::signalStartConnect, this, &CBoard::slotStartConnect);
 
+    // Очень важный параметр, см. комментарий к процедуре drawBackground
     setCacheMode(QGraphicsView::CacheBackground);
-}
 
-// ------------------------------------------------------------------------------------------------
-void CBoard::createScene()
-{
+    setBackground(bg_manager->currentFile());
+
+    // Сцена
     m_scene = new CScene(m_field, this);
-    m_scene->setBackground(bg_manager->currentFile());
     setScene(m_scene);
 
     connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
 
+    // Сразу новая игра
     slotNewGame();
 }
 
@@ -75,7 +76,13 @@ void CBoard::slotRepeatGame()
 // Новая игра
 void CBoard::doNewGame()
 {
-    if (m_game_state == gsDemostration) return;
+    if (m_game_state == gsDemostration) {
+        closeDemonstration();
+        // В это месте не заполнено field, а его нужно заполнить
+        m_field->newGame(m_field_types[settings->currentGameType()].x,
+                m_field_types[settings->currentGameType()].y,
+                m_field_types[settings->currentGameType()].count);
+    }
 
     m_game_state = gsNormal;
     m_path_type = ptNone;
@@ -105,13 +112,18 @@ void CBoard::slotHint()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotPause()
 {
-    if (m_game_state != gsPause) {
-        showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
-        m_prev_pause_state = m_game_state;
-        m_game_state = gsPause;
-    } else {
+    if (m_game_state == gsPause) {
         hideMessage(true);
         m_game_state = m_prev_pause_state;
+        m_field->checkStatusUndoRedo();
+    } else {
+        if (m_game_state == gsNormal) {
+            showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
+            m_prev_pause_state = m_game_state;
+            m_game_state = gsPause;
+            emit signalUndoRedo(false, false);
+        }
+
     }
 }
 
@@ -133,7 +145,7 @@ void CBoard::slotSetTileset()
 // Установить новый фон
 void CBoard::slotSetBackground()
 {
-    m_scene->setBackground(bg_manager->currentFile());
+    setBackground(bg_manager->currentFile());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -171,9 +183,10 @@ void CBoard::timerEvent(QTimerEvent *event)
 
 // ------------------------------------------------------------------------------------------------
 // Нарисовать фон
+// Так как установлено кеширование фона
 void CBoard::drawBackground(QPainter *painter, const QRectF &rect)
 {
-    painter->drawPixmap(rect, m_scene->m_bg_pixmap, m_scene->m_bg_pixmap.rect());
+    painter->drawPixmap(rect, m_bg_pixmap, m_bg_pixmap.rect());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -184,6 +197,39 @@ void CBoard::drawForeground(QPainter *painter, const QRectF &)
         paintMessage(painter);
     if (m_path_type != ptNone)
         paintPath(painter);
+}
+
+// ------------------------------------------------------------------------------------------------
+// Установить изображение из файла
+void CBoard::setBackground(const QString &file_name)
+{
+    if (!QFileInfo::exists(file_name)) {
+        settings->setDefaultBackground();
+    }
+
+    if (!QFileInfo::exists(file_name)) return;
+
+    QSize size;
+
+    if (bg_manager->isCurrentSvg()) {
+        // SVG item
+        QSvgRenderer bg_renderer(file_name);
+        QGraphicsSvgItem m_bg_svg;
+        m_bg_svg.setSharedRenderer(&bg_renderer);
+        size = m_bg_svg.boundingRect().size().toSize();
+        // Рисуем на Image
+        QImage img(size, QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&img);
+        bg_renderer.render(&painter);
+        // И сохраним как зависимый Pixmap
+        m_bg_pixmap = QPixmap::fromImage(img);
+    } else {
+        // Image item
+        QImage img(file_name);
+        m_bg_pixmap = QPixmap::fromImage(img);
+    }
+
+    setBackgroundBrush(m_bg_pixmap);
 }
 
 // ------------------------------------------------------------------------------------------------

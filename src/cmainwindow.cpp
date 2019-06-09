@@ -50,8 +50,6 @@ void CMainWindow::createBoard()
     m_board = new CBoard(this);
     setCentralWidget(m_board);
 
-    m_board->createScene();
-
     connect(ui->acNewGame, &QAction::triggered, m_board, &CBoard::slotNewGame);
     connect(ui->acRepeat, &QAction::triggered, m_board, &CBoard::slotRepeatGame);
     connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHint);
