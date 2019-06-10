@@ -434,6 +434,7 @@ void CBoard::checkResult()
 {
     m_game_state = gsEmpty;
     hideMessage(false);
+    emit signalUndoRedo(false, false);
 
     int result = -1;
     if (!settings->isTraining() || !m_is_cunning)
