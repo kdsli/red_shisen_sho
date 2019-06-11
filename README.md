@@ -10,6 +10,8 @@ The goal of the project was to find the optimal tiles removal algorithms.
 
 In version 0.3, the program is rewritten using QGraphicsView and QGraphicsScene.
 
+In version 0.4, the game control logic is transferred to the QStateMachine state machine.
+
 In addition, the program has additional features in relation to the original game: 
 
 - when a program reaches a deadlock, it demonstrates that the correct way to remove the tiles is possible.
