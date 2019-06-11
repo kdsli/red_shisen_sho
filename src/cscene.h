@@ -36,8 +36,6 @@ public:
 signals:
     // Изменился статус программы
     void signalVariantStatus(VariantStatus);
-    // Сигнал изменения статусной информации
-    void signalUpdateInfo();
 
 public slots:
     void slotUndo();

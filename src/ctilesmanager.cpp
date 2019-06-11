@@ -37,6 +37,13 @@ CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
     m_lib_dir(settings->mahjonggLibDir() + tiles_dir + QDir::separator()),
     m_renderer(nullptr)
 {
+    addTileSeries("CHARACTER", 9);
+    addTileSeries("ROD", 9);
+    addTileSeries("BAMBOO", 9);
+    addTileSeries("WIND", 4);
+    addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
+    addTileSeries("DRAGON", 3);
+    addTileSeries("FLOWER", 4);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &CTilesManager::slotDirectoryChanged);
     m_watcher.addPath(m_lib_dir);
@@ -110,16 +117,6 @@ void CTilesManager::initFiles()
 // Инициализация текущего файла
 void CTilesManager::initCurrentFile()
 {
-    m_tiles_names.clear();
-
-    addTileSeries("CHARACTER", 9);
-    addTileSeries("ROD", 9);
-    addTileSeries("BAMBOO", 9);
-    addTileSeries("WIND", 4);
-    addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
-    addTileSeries("DRAGON", 3);
-    addTileSeries("FLOWER", 4);
-
     if (m_renderer) delete m_renderer;
     m_renderer = new QSvgRenderer(currentFile());
 
@@ -148,6 +145,7 @@ const QString &CTilesManager::getSelectedBaseName() const
 }
 
 // ------------------------------------------------------------------------------------------------
+// Прочитать и сохранить изображение одной костяшки из файла (для окна настроек)
 void CTilesManager::loadSvg(const QString &file_name)
 {
     TilesFile file;

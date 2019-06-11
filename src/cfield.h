@@ -22,6 +22,8 @@ public:
     // Вернуть начальное поле
     void restoreField();
 
+    QString tilesInfo();
+
     // Соединим две ячейки (если возможно)
     void Connect(const TilePair &tiles);
 

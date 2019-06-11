@@ -140,6 +140,9 @@
    </property>
   </action>
   <action name="acPause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources/red_shisen_sho.qrc">
      <normaloff>:/images/pause.png</normaloff>:/images/pause.png</iconset>

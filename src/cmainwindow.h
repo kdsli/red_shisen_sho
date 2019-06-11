@@ -1,7 +1,7 @@
 #ifndef CMAINWINDOW_H
 #define CMAINWINDOW_H
 
-#include "cboard.h"
+#include "cgame.h"
 
 #include "coptionsdialog.h"
 #include "crecordsdialog.h"
@@ -22,11 +22,11 @@ public:
 
 private:
     Ui::CMainWindow *ui;
-    CBoard*m_board;
+    CGame *m_game;
     COptionsDialog *m_options_dialog;
     CRecordsDialog *m_record_dialog;
 
-    void createBoard();
+    void createGame();
 
 private slots:
     void slotOptions();
@@ -37,6 +37,7 @@ private slots:
     void slotRecords();
     void slotShowResults(int index);
     void slotAbout();
+    void slotResetPauseAction();
 };
 
 #endif // CMAINWINDOW_H

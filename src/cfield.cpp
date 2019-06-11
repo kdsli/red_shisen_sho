@@ -66,6 +66,13 @@ void CField::restoreField()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Информация о текущем состоянии поля
+QString CField::tilesInfo()
+{
+    return QString::number(m_tiles_count - m_remaining) + "/" + QString::number(m_tiles_count);
+}
+
+// ------------------------------------------------------------------------------------------------
 // Соединим две ячейки (если возможно)
 void CField::Connect(const TilePair &tiles)
 {

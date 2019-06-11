@@ -16,10 +16,6 @@ COptionsDialog::COptionsDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    auto rect = geometry();
-//    rect.moveCenter(QApplication::desktop()->availableGeometry().center());
-//    setGeometry(rect);
-
     settings->registerGeometry(this);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &COptionsDialog::slotAccepted);
@@ -114,7 +110,7 @@ void COptionsDialog::slotAccepted()
     if (ui->lwTiles->currentRow() != tiles_manager->currentIndex()) {
         settings->setCurrentTileset(tiles_manager->tilesList()[ui->lwTiles->currentRow()].file_name);
         is_new_game = true;
-        emit signalTilesChange();
+        tiles_manager->initCurrentFile();
     }
 
     if (ui->lwBackgrounds->currentRow() != bg_manager->currentIndex()) {

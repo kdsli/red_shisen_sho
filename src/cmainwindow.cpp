@@ -14,7 +14,7 @@
 
 CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
     ui(new Ui::CMainWindow),
-    m_board(nullptr),
+    m_game(nullptr),
     m_options_dialog(nullptr),
     m_record_dialog(nullptr)
 {
@@ -37,7 +37,7 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 
     slotTrainingChange();
 
-    createBoard();
+    createGame();
 }
 
 CMainWindow::~CMainWindow()
@@ -45,22 +45,26 @@ CMainWindow::~CMainWindow()
     delete ui;
 }
 
-void CMainWindow::createBoard()
+void CMainWindow::createGame()
 {
-    m_board = new CBoard(this);
-    setCentralWidget(m_board);
+    m_game = new CGame(this);
+    setCentralWidget(m_game->board());
 
-    connect(ui->acNewGame, &QAction::triggered, m_board, &CBoard::slotNewGame);
-    connect(ui->acRepeat, &QAction::triggered, m_board, &CBoard::slotRepeatGame);
-    connect(ui->acHint, &QAction::triggered, m_board, &CBoard::slotHint);
-    connect(ui->acPause, &QAction::triggered, m_board, &CBoard::slotPause);
+    // Сигналы от нас, изменяющие состояние
+    connect(ui->acNewGame, &QAction::triggered, m_game, &CGame::signalNewGame);
+    connect(ui->acRepeat, &QAction::triggered, m_game, &CGame::signalRepeatGame);
+    connect(ui->acPause, &QAction::triggered, m_game, &CGame::signalPause);
 
-    connect(ui->acUndo, &QAction::triggered, m_board, &CBoard::slotUndo);
-    connect(ui->acRedo, &QAction::triggered, m_board, &CBoard::slotRedo);
+    // Сигналы от нас, не изменяющие состояние
+    connect(ui->acHint, &QAction::triggered, m_game->board(), &CBoard::slotHint);
+    connect(ui->acUndo, &QAction::triggered, m_game->board(), &CBoard::slotUndo);
+    connect(ui->acRedo, &QAction::triggered, m_game->board(), &CBoard::slotRedo);
 
-    connect(m_board, &CBoard::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
-    connect(m_board, &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
-    connect(m_board, &CBoard::signalShowResult, this, &CMainWindow::slotShowResults);
+    // Сигналы нам
+    connect(m_game, &CGame::signalUpdateInfo, this, &CMainWindow::slotUpdateInfo);
+    connect(m_game, &CGame::signalResetPauseAction, this, &CMainWindow::slotResetPauseAction);
+    connect(m_game, &CGame::signalShowResult, this, &CMainWindow::slotShowResults);
+    connect(m_game->board(), &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
 }
 
 void CMainWindow::slotOptions()
@@ -68,13 +72,11 @@ void CMainWindow::slotOptions()
     if (!m_options_dialog) {
         m_options_dialog = new COptionsDialog(this);
         connect(m_options_dialog, &COptionsDialog::signalRequiredNewGame,
-                m_board, &CBoard::slotNewTypeGame);
+                m_game, &CGame::slotNewTypeGame);
         connect(m_options_dialog, &COptionsDialog::signalTrainingChange,
                 this, &CMainWindow::slotTrainingChange);
-        connect(m_options_dialog, &COptionsDialog::signalTilesChange,
-                m_board, &CBoard::slotSetTileset);
         connect(m_options_dialog, &COptionsDialog::signalBackgroundChange,
-                m_board, &CBoard::slotSetBackground);
+                m_game->board(), &CBoard::slotSetBackground);
         connect(m_options_dialog, &COptionsDialog::signalLanguageChange,
                 this, &CMainWindow::slotSetLanguage);
     }
@@ -84,7 +86,7 @@ void CMainWindow::slotOptions()
 
 void CMainWindow::slotUpdateInfo()
 {
-    statusBar()->showMessage(m_board->gameInfo());
+    statusBar()->showMessage(m_game->gameInfo());
 }
 
 void CMainWindow::slotUndoRedo(bool is_undo, bool is_redo)
@@ -136,5 +138,11 @@ void CMainWindow::slotAbout()
     QMessageBox::about(this, tr("О программе"), tr("Автор: Дмитрий") + " kdsli@kdsl.ru\n\n"
                        + tr("Версия: ") + version + "\n"
                        + tr("Дата сборки: ") + date);
+}
+
+// Сбросить статус pause action (из-за щелчка во время паузы)
+void CMainWindow::slotResetPauseAction()
+{
+    ui->acPause->setChecked(false);
 }
 

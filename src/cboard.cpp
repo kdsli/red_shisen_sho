@@ -1,6 +1,7 @@
 #include "cboard.h"
 
 #include "csettings.h"
+#include "common_types.h"
 #include "cbackgroundmanager.h"
 #include "ctilesmanager.h"
 #include "crecordsmanager.h"
@@ -8,9 +9,9 @@
 #include <QResizeEvent>
 #include <QFileInfo>
 
-CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
-    m_field(new CField(this)),
-    m_scene(nullptr)
+CBoard::CBoard(CScene *scene, CField *field, QWidget *parent) : QGraphicsView(parent),
+    m_field(field),
+    m_scene(scene)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_NoSystemBackground);
@@ -21,14 +22,6 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Заполним массив типов полей
-    m_field_types.insert(fz14x6, {14, 6, 4});
-    m_field_types.insert(fz16x9, {16, 9, 4});
-    m_field_types.insert(fz18x8, {18, 8, 4});
-    m_field_types.insert(fz24x12, {24, 12, 8});
-    m_field_types.insert(fz26x14, {26, 14, 8});
-    m_field_types.insert(fz30x16, {30, 16, 12});
-
     connect(m_field, &CField::signalStatusUndoRedo, this, &CBoard::signalUndoRedo);
     connect(m_field, &CField::signalStartConnect, this, &CBoard::slotStartConnect);
 
@@ -37,108 +30,23 @@ CBoard::CBoard(QWidget *parent) : QGraphicsView(parent),
 
     setBackground(bg_manager->currentFile());
 
-    // Сцена
-    m_scene = new CScene(m_field, this);
     setScene(m_scene);
-
-    connect(m_scene, &CScene::signalUpdateInfo, this, &CBoard::signalUpdateInfo);
-
-    // Сразу новая игра
-    slotNewGame();
 }
 
 // ------------------------------------------------------------------------------------------------
-QString CBoard::gameInfo()
+// Сбросить все параметры игры (начать новую игру)
+void CBoard::newGame()
 {
-    return tr("Ваше время: ") + getSecondsString() + tr("  Удалено: ")
-            + QString::number(m_field->m_tiles_count - m_field->m_remaining) + "/"
-            + QString::number(m_field->m_tiles_count);
-}
-
-// ------------------------------------------------------------------------------------------------
-void CBoard::slotNewGame()
-{
-    m_field->newGame(m_field_types[settings->currentGameType()].x,
-            m_field_types[settings->currentGameType()].y,
-            m_field_types[settings->currentGameType()].count);
-
-    doNewGame();
-}
-
-// ------------------------------------------------------------------------------------------------
-void CBoard::slotRepeatGame()
-{
-    m_field->restoreField();
-    doNewGame();
-}
-
-// ------------------------------------------------------------------------------------------------
-// Новая игра
-void CBoard::doNewGame()
-{
-    if (m_game_state == gsDemostration) {
-        closeDemonstration();
-        // В это месте не заполнено field, а его нужно заполнить
-        m_field->newGame(m_field_types[settings->currentGameType()].x,
-                m_field_types[settings->currentGameType()].y,
-                m_field_types[settings->currentGameType()].count);
-    }
-
-    m_game_state = gsNormal;
-    m_path_type = ptNone;
-    m_message.clear();
+    m_path_state = CBoard::psNone;
     m_is_cunning = false;
-
-    // Заполним сцену новыми значениями
-    m_scene->newGame();
-
-    recalcView();
-
-    // Запускаем таймер игры
-    m_seconds = 0;
-    m_game_timer = startTimer(1000);
-
-    emit signalUpdateInfo();
 }
 
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotHint()
 {
-    if (m_game_state != gsNormal) return;
+    if (m_game_state != gsGame) return;
     showHint();
     m_is_cunning = true;
-}
-
-// ------------------------------------------------------------------------------------------------
-void CBoard::slotPause()
-{
-    if (m_game_state == gsPause) {
-        hideMessage(true);
-        m_game_state = m_prev_pause_state;
-        m_field->checkStatusUndoRedo();
-    } else {
-        if (m_game_state == gsNormal) {
-            showMessage(tr("Игра приостановлена") + "\n" + tr("Щелкните для продолжения"), true);
-            m_prev_pause_state = m_game_state;
-            m_game_state = gsPause;
-            emit signalUndoRedo(false, false);
-        }
-
-    }
-}
-
-// ------------------------------------------------------------------------------------------------
-// Изменился тип игры (из окна настроек)
-void CBoard::slotNewTypeGame()
-{
-    slotNewGame();
-}
-
-// ------------------------------------------------------------------------------------------------
-// Изменился тип костяшек
-void CBoard::slotSetTileset()
-{
-    tiles_manager->initCurrentFile();
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -167,12 +75,6 @@ void CBoard::mousePressEvent(QMouseEvent *event)
 // ------------------------------------------------------------------------------------------------
 void CBoard::timerEvent(QTimerEvent *event)
 {
-    if (event->timerId() == m_game_timer) {
-        if (m_game_state == gsNormal) {
-            ++m_seconds;
-            emit signalUpdateInfo();
-        }
-    }
     if (event->timerId() == m_path_timer) {
         doFinishPath();
     }
@@ -183,7 +85,8 @@ void CBoard::timerEvent(QTimerEvent *event)
 
 // ------------------------------------------------------------------------------------------------
 // Нарисовать фон
-// Так как установлено кеширование фона
+// Так как установлено кеширование фона, эта функция вызывается только один раз
+// после вызова setBackgroundBrush, далее QT сам рисует фон
 void CBoard::drawBackground(QPainter *painter, const QRectF &rect)
 {
     painter->drawPixmap(rect, m_bg_pixmap, m_bg_pixmap.rect());
@@ -195,12 +98,12 @@ void CBoard::drawForeground(QPainter *painter, const QRectF &)
 {
     if (!m_message.isEmpty())
         paintMessage(painter);
-    if (m_path_type != ptNone)
+    if (m_path_state != psNone)
         paintPath(painter);
 }
 
 // ------------------------------------------------------------------------------------------------
-// Установить изображение из файла
+// Установить изображение фона из файла
 void CBoard::setBackground(const QString &file_name)
 {
     if (!QFileInfo::exists(file_name)) {
@@ -251,23 +154,17 @@ void CBoard::recalcView()
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
     // Если перерисовывается путь - мышь недоступна
-    if (m_path_type == ptPath || m_path_type == ptHint) return;
+    if (m_path_state == psPath || m_path_state == psHint) return;
 
     switch (m_game_state) {
-    case gsNormal:
+    case gsGame:
         m_scene->mouseLeft(mapToScene(event->pos()));
         break;
     case gsPause:
-        slotPause();
-        break;
     case gsDemostration:
-        closeDemonstration();
-        break;
     case gsNotVariants:
-        startDemonstration();
-        break;
     case gsVictory:
-        checkResult();
+        emit signalClick();
         break;
     case gsEmpty:
         break;
@@ -284,7 +181,7 @@ void CBoard::clickRightButton(QMouseEvent *event)
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotUndo()
 {
-    if (m_game_state != gsNormal) return;
+    if (m_game_state != gsGame) return;
     m_is_cunning = true;
     m_scene->slotUndo();
 }
@@ -292,34 +189,9 @@ void CBoard::slotUndo()
 // ------------------------------------------------------------------------------------------------
 void CBoard::slotRedo()
 {
-    if (m_game_state != gsNormal) return;
+    if (m_game_state != gsGame) return;
     m_is_cunning = true;
     m_scene->slotRedo();
-}
-
-// ------------------------------------------------------------------------------------------------
-// Победа!
-void CBoard::doVictory()
-{
-    m_game_state = gsVictory;
-    stopGameTimer();
-    QString s = tr("Вы выиграли за ") + getSecondsString() + "!";
-    if (settings->isTraining() && !m_is_cunning)
-        s += "\n" + tr("Вы не пользовались подсказками, пожалуй, мы занесем ваш результат в таблицу рекордов");
-    showMessage(s);
-}
-
-// ------------------------------------------------------------------------------------------------
-// Поражение :(
-void CBoard::doNotVariant()
-{
-    m_game_state = gsNotVariants;
-    stopGameTimer();
-
-    QString s = tr("Игра зашла в тупик.") + "\n";
-    if (settings->isDecision())
-        s += tr("А вариант был - посмотрите демонстрацию.") + "\n";
-    showMessage(s + tr("Щелкните для продолжения..."));
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -387,7 +259,7 @@ void CBoard::doFinishPath()
     m_path_timer = -1;
 
     // Для окончания снятия костяшек
-    if (m_path_type == ptPath) {
+    if (m_path_state == psPath) {
 
         // Удалить костяшки
         m_scene->removeTiles(m_scene->m_deleted_tiles);
@@ -399,16 +271,16 @@ void CBoard::doFinishPath()
         // Проверим состояние программы
         auto status = m_field->getGameStatus();
         if (status == vsVictory)
-            doVictory();
+            emit signalVictory();
         if (status == vsNotVariant)
-            doNotVariant();
+            emit signalNotVariant();
 
-        m_path_type = ptNone;
+        m_path_state = psNone;
     }
 
     // Для подсказки
-    if (m_path_type == ptHint) {
-        m_path_type = ptNone;
+    if (m_path_state == psHint) {
+        m_path_state = psNone;
         repaintPath();
     }
 
@@ -420,27 +292,13 @@ void CBoard::doFinishPath()
 // Показать hint
 void CBoard::showHint()
 {
-    if (m_path_type != ptNone) return;
+    if (m_path_state != psNone) return;
 
     m_scene->clearSelected();
     // В m_scene.path() лежит текущая подсказка
-    m_path_type = ptHint;
+    m_path_state = psHint;
 
     doStartPath(m_field->m_hint_tiles);
-}
-
-// ------------------------------------------------------------------------------------------------
-void CBoard::checkResult()
-{
-    m_game_state = gsEmpty;
-    hideMessage(false);
-    emit signalUndoRedo(false, false);
-
-    int result = -1;
-    if (!settings->isTraining() || !m_is_cunning)
-        result = records_manager->checkRecord(m_seconds);
-
-    emit signalShowResult(result);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -456,32 +314,13 @@ void CBoard::startDemonstration()
 
     if (!settings->isDecision()) return;
 
-    m_game_state = gsDemostration;
-    m_path_type = ptDemostration;
+    m_path_state = psDemostration;
 
     // Текущий номер демонстрации - индекс в массиве m_field->m_right_pathes
     m_demostration_index = 0;
 
     m_demostration_timer = startTimer(settings->timeDelay());
 
-}
-
-// ------------------------------------------------------------------------------------------------
-void CBoard::stopGameTimer()
-{
-    Q_ASSERT(m_game_timer != -1);
-    killTimer(m_game_timer);
-    m_game_timer = -1;
-}
-
-// ------------------------------------------------------------------------------------------------
-// Секунды в строку
-QString CBoard::getSecondsString()
-{
-    QTime t(0, 0, 0);
-    t = t.addSecs(m_seconds);
-
-    return t.toString("hh:mm:ss");
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -494,7 +333,7 @@ void CBoard::paintMessage(QPainter *painter) const
     painter->setPen(pen);
     painter->setBrush(QColor::fromRgb(50, 50, 50, 150));
 
-    painter->drawRoundedRect(m_message_rect, 10, 10);
+    painter->drawRoundedRect(m_message_rect, 20, 20);
 
     QFont font;
     font.setPixelSize(m_message_font_pixel);
@@ -579,7 +418,7 @@ void CBoard::closeDemonstration()
     m_field->m_tiles.fill(-1);
     viewport()->update();
 
-    m_game_state = gsEmpty;
+    emit signalClick();
 
     emit signalUndoRedo(false, false);
 }
@@ -588,7 +427,7 @@ void CBoard::closeDemonstration()
 // Поле сказало, что надо начинать удалять костяшки
 void CBoard::slotStartConnect(const TilePair &tiles)
 {
-    m_path_type = ptPath;
+    m_path_state = psPath;
 
     // Выделить вторую костяшку
     m_scene->addSelected(tiles.second);
