@@ -7,6 +7,6 @@ output_Debug
 output_debug
 output_Release
 output_release
-CMakeLists.txt.user
+CMakeLists.txt.user*
 src/version.inc
 olds

@@ -96,6 +96,7 @@ void CBoard::drawBackground(QPainter *painter, const QRectF &rect)
 // Все что поверх фона
 void CBoard::drawForeground(QPainter *painter, const QRectF &)
 {
+    painter->setRenderHint(QPainter::Antialiasing);
     if (!m_message.isEmpty())
         paintMessage(painter);
     if (m_path_state != psNone)
@@ -332,12 +333,12 @@ void CBoard::startDemonstration()
 void CBoard::paintMessage(QPainter *painter) const
 {
     QPen pen(Qt::black);
-    pen.setWidth(2);
+    pen.setWidth(5);
     pen.setColor(Qt::white);
     painter->setPen(pen);
     painter->setBrush(QColor::fromRgb(50, 50, 50, 150));
 
-    painter->drawRoundedRect(m_message_rect, 20, 20);
+    painter->drawRoundedRect(m_message_rect, 50, 50);
 
     QFont font;
     font.setPixelSize(m_message_font_pixel);
