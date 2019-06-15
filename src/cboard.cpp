@@ -295,7 +295,11 @@ void CBoard::showHint()
     if (m_path_state != psNone) return;
 
     m_scene->clearSelected();
-    // В m_scene.path() лежит текущая подсказка
+    // В m_field.m_path лежит текущая подсказка. Но на всякий случай проверим
+    if (m_field->m_path.isEmpty()) {
+        TilePair tiles;
+        m_field->checkConnect(m_field->m_tiles, tiles);
+    }
     m_path_state = psHint;
 
     doStartPath(m_field->m_hint_tiles);
