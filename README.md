@@ -1,4 +1,3 @@
-# red_shisen_sho
 kdsli version for shishen_sho
 
 This project was created to teach my son how to program and maintain my professional skills, and also because of the small amount of free time.
