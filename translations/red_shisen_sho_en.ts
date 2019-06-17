@@ -2,19 +2,19 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>CBoard</name>
+    <name>CGame</name>
     <message>
-        <location filename="../src/cboard.cpp" line="+67"/>
+        <location filename="../src/cgame.cpp" line="+96"/>
         <source>Ваше время: </source>
         <translation>Time&quot;: </translation>
     </message>
     <message>
-        <location line="+0"/>
+        <location line="+1"/>
         <source>  Удалено: </source>
         <translation>  Deleted: </translation>
     </message>
     <message>
-        <location line="+53"/>
+        <location line="+88"/>
         <source>Игра приостановлена</source>
         <translation>Game paused</translation>
     </message>
@@ -24,7 +24,7 @@
         <translation>Click to resume game</translation>
     </message>
     <message>
-        <location line="+145"/>
+        <location line="+18"/>
         <source>Вы выиграли за </source>
         <translation>You won in </translation>
     </message>
@@ -34,7 +34,7 @@
         <translation>You didn’t use prompts, perhaps we will put your result in the table of records</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+21"/>
         <source>Игра зашла в тупик.</source>
         <translation>The game is deadlocked.</translation>
     </message>
@@ -142,7 +142,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+111"/>
+        <location filename="../src/cmainwindow.cpp" line="+109"/>
         <source>Внимание!</source>
         <translation>Attention!</translation>
     </message>
@@ -285,7 +285,7 @@
         <translation>Background</translation>
     </message>
     <message>
-        <location filename="../src/coptionsdialog.cpp" line="+30"/>
+        <location filename="../src/coptionsdialog.cpp" line="+31"/>
         <source>медленно</source>
         <translation>slow</translation>
     </message>
@@ -341,7 +341,7 @@
 <context>
     <name>CTilesManager</name>
     <message>
-        <location filename="../src/ctilesmanager.cpp" line="+100"/>
+        <location filename="../src/ctilesmanager.cpp" line="+107"/>
         <source>Отсутствует директория tileset</source>
         <translation>Missing tileset directory</translation>
     </message>
