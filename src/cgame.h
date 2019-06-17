@@ -88,7 +88,6 @@ private slots:
     void slotEmptyEntered();
 
     void slotDemonstrationEntered();
-    void slotDemonstrationExited();
 
 };
 
