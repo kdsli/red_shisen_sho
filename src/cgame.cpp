@@ -255,7 +255,7 @@ void CGame::slotDemonstrationEntered()
 // Выйти из режима демонстрации
 void CGame::slotDemonstrationExited()
 {
-    m_board->closeDemonstration();
+//    m_board->closeDemonstration();
 }
 
 
