@@ -46,7 +46,7 @@ add_executable(
     ${HEADER_FILES}
     ${UI_FILES}
     ${RESOURCES}
-#    ${QM_FILES}
+    ${QM_FILES}
     ${OUTPUT_FILE}
 )
 
