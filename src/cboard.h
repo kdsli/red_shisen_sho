@@ -109,7 +109,7 @@ private:
     void startDemonstration();
     void doDemonstration();
     void clearDemostrationTiles(const TilePair &tiles);
-    void closeDemonstration();
+    void stopDemonstration();
 
 private slots:
     void slotStartConnect(const TilePair &tiles);

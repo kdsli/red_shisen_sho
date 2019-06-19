@@ -82,6 +82,7 @@ CGame::CGame(QObject *parent) : QStateMachine(parent),
     connect(&m_not_variants, &QState::exited, this, &CGame::slotNotVariantExited);
     connect(&m_empty, &QState::entered, this, &CGame::slotEmptyEntered);
     connect(&m_demonstration, &QState::entered, this, &CGame::slotDemonstrationEntered);
+    connect(&m_demonstration, &QState::exited, this, &CGame::slotDemonstrationExited);
 
     signalNewGame();
 
@@ -248,5 +249,10 @@ void CGame::slotEmptyEntered()
 void CGame::slotDemonstrationEntered()
 {
     m_board->startDemonstration();
+}
+
+void CGame::slotDemonstrationExited()
+{
+    m_board->stopDemonstration();
 }
 

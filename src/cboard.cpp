@@ -382,7 +382,7 @@ void CBoard::doDemonstration()
 
     // Проверка окончания
     if (m_demostration_index == m_field->m_right_pathes.size()) {
-        closeDemonstration();
+        emit signalClick();
         return;
     }
 
@@ -412,7 +412,7 @@ void CBoard::clearDemostrationTiles(const TilePair &tiles)
 
 // ------------------------------------------------------------------------------------------------
 // Завершаем демонстрцию
-void CBoard::closeDemonstration()
+void CBoard::stopDemonstration()
 {
     Q_ASSERT(m_demostration_timer != -1);
     killTimer(m_demostration_timer);
@@ -422,8 +422,6 @@ void CBoard::closeDemonstration()
     m_scene->clear();
     m_field->m_tiles.fill(-1);
     viewport()->update();
-
-    emit signalClick();
 
     emit signalUndoRedo(false, false);
 }
