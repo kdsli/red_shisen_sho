@@ -137,7 +137,8 @@ void CMainWindow::slotAbout()
 
     QMessageBox::about(this, tr("О программе"), tr("Автор: Дмитрий") + " kdsli@kdsl.ru\n\n"
                        + tr("Версия: ") + version + "\n"
-                       + tr("Дата сборки: ") + date);
+                       + tr("Дата сборки: ") + date
+                       + "\n\n" + tr("Исходный код: https://github.com/kdsli/red_shisen_sho" ));
 }
 
 // Сбросить статус pause action (из-за щелчка во время паузы)
