@@ -172,6 +172,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Исходный код:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/cmainwindow.ui"/>
         <source>red_shisen_sho</source>
         <translation type="unfinished"></translation>

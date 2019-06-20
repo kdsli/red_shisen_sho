@@ -172,6 +172,11 @@
         <translation>Build date: </translation>
     </message>
     <message>
+        <location line="+1"/>
+        <source>Исходный код:</source>
+        <translation>Source code:</translation>
+    </message>
+    <message>
         <location filename="../src/cmainwindow.ui"/>
         <source>red_shisen_sho</source>
         <translation></translation>

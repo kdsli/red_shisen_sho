@@ -38,7 +38,7 @@ CSettings::CSettings() : CKeeperSettings ()
     m_current_game_type = static_cast<GameType>(value(current_field_type_name, fz18x8).toInt());
     m_timer_delay = value(timer_delay_name, 1).toInt();
     m_background = value(background_name, "egyptian.svgz").toString();
-    m_tileset = value(tileset_name, "default.svgz").toString();
+    m_tileset = value(tileset_name, "alphabet.svgz").toString();
     m_gravity = value(gravity_name, true).toBool();
     m_decision = value(decision_name, true).toBool();
     m_training = value(training_name, true).toBool();
