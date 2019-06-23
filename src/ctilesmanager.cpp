@@ -43,7 +43,7 @@ CTilesManager::CTilesManager(QObject *parent) : QObject(parent),
     addTileSeries("WIND", 4);
     addTileSeries("SEASON", isCorrectSVG() ? 4 : 1);
     addTileSeries("DRAGON", 3);
-    addTileSeries("FLOWER", 4);
+    addTileSeries("FLOWER", isCorrectSVG() ? 4 : 1);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &CTilesManager::slotDirectoryChanged);
     m_watcher.addPath(m_lib_dir);
