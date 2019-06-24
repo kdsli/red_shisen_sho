@@ -110,7 +110,6 @@ void COptionsDialog::slotAccepted()
     if (ui->lwTiles->currentRow() != tiles_manager->currentIndex()) {
         settings->setCurrentTileset(tiles_manager->tilesList()[ui->lwTiles->currentRow()].file_name);
         is_new_game = true;
-        tiles_manager->initCurrentFile();
     }
 
     if (ui->lwBackgrounds->currentRow() != bg_manager->currentIndex()) {
