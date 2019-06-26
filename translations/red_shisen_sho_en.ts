@@ -346,7 +346,7 @@
 <context>
     <name>CTilesManager</name>
     <message>
-        <location filename="../src/ctilesmanager.cpp" line="+107"/>
+        <location filename="../src/ctilesmanager.cpp" line="+99"/>
         <source>Отсутствует директория tileset</source>
         <translation>Missing tileset directory</translation>
     </message>
