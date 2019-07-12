@@ -122,8 +122,6 @@ void CTilesManager::initCurrentFile()
     addTileSeries("DRAGON", 3);
     addTileSeries("FLOWER", isCorrectSVG() ? 4 : 1);
 
-    int a = m_tiles_names.size();
-
     // Базовый размер основы и костяшки
     getTileSize(base_name, m_base_size);
     getTileSize("CHARACTER_2", m_tile_size);
