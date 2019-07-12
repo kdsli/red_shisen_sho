@@ -66,6 +66,9 @@ void CBoard::resizeEvent(QResizeEvent *)
 // Нажатие на кнопки мыши
 void CBoard::mousePressEvent(QMouseEvent *event)
 {
+    // Если перерисовывается путь - мышь недоступна
+    if (m_path_state == psPath || m_path_state == psHint) return;
+
      if (event->buttons().testFlag(Qt::LeftButton))
          clickLeftButton(event);
      if (event->buttons().testFlag(Qt::RightButton) && settings->isTraining())
@@ -154,9 +157,6 @@ void CBoard::recalcView()
 // ------------------------------------------------------------------------------------------------
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
-    // Если перерисовывается путь - мышь недоступна
-    if (m_path_state == psPath || m_path_state == psHint) return;
-
     switch (m_game_state) {
     case gsGame:
         m_scene->mouseLeft(mapToScene(event->pos()));

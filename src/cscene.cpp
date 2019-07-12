@@ -111,33 +111,37 @@ void CScene::mouseLeft(QPointF point)
 {
     // Получим костяшку по координатам
     auto tile = getTileIndex(point);
-
-    // Если кликнули мимо
-    if (tile.x() == -1 || m_field->getTileType(tile) == -1) {
+    if (tile.x() == -1) {
         clearSelected();
+        return;
+    }
+    auto curr_type = m_field->getTileType(tile);
+    if (curr_type == -1) {
+        clearSelected();
+        return;
+    }
+
+    // Если выбранных нет - выделить ее
+    if (m_selected.isEmpty()) {
+        addSelected(tile);
     } else {
-        // Если выбранных нет - выделить ее
-        if (m_selected.isEmpty()) {
+        // Если заявок выбрано больше одной - все очистить, нужную выделить
+        if (m_selected.size() > 1) {
+            clearSelected();
             addSelected(tile);
         } else {
-            // Если заявок выбрано больше одной - все очистить, нужную выделить
-            if (m_selected.size() > 1) {
+            // Выбрана ровно одна заявка, если она уже выделена - убрать выделение
+            if (m_selected.front() == tile) {
                 clearSelected();
-                addSelected(tile);
             } else {
-                // Выбрана ровно одна заявка, если она уже выделена - убрать выделение
-                if (m_selected.front() == tile) {
-                    clearSelected();
+                // Проверить, совпадает ли тип
+                if (m_field->getTileType(tile) == m_field->getTileType(m_selected.front())) {
+                    // Пробуем соединить между собой
+                    m_field->Connect(TilePair(m_selected.front(), tile));
                 } else {
-                    // Проверить, совпадает ли тип
-                    if (m_field->getTileType(tile) == m_field->getTileType(m_selected.front())) {
-                        // Пробуем соединить между собой
-                        m_field->Connect(TilePair(m_selected.front(), tile));
-                    } else {
-                        // Тип не совпадает, кликнута на другую костяшку
-                        // Убрать выделение
-                        clearSelected();
-                    }
+                    // Тип не совпадает, кликнута на другую костяшку
+                    // Убрать выделение
+                    clearSelected();
                 }
             }
         }
@@ -152,8 +156,9 @@ void CScene::mouseRight(QPointF point)
 
     auto tile = getTileIndex(point);
     if (tile.x() == -1) return;
-
     auto curr_type = m_field->getTileType(tile);
+    if (curr_type == -1) return;
+
     for (int i = 0; i < m_field->m_tiles_count; ++i) {
         if (m_field->getTileType(i) == curr_type)
             addSelected(m_field->getTile(i));
