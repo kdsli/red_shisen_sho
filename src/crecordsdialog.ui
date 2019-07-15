@@ -34,10 +34,10 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>410</y>
-     <width>174</width>
-     <height>33</height>
+     <x>260</x>
+     <y>481</y>
+     <width>84</width>
+     <height>34</height>
     </rect>
    </property>
    <property name="orientation">
@@ -45,6 +45,19 @@
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buClear">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>481</y>
+     <width>197</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Очистить таблицу рекордов</string>
    </property>
   </widget>
  </widget>
@@ -62,22 +75,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>CRecordsDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
      <y>274</y>
     </hint>
    </hints>

@@ -4,7 +4,7 @@
 <context>
     <name>CGame</name>
     <message>
-        <location filename="../src/cgame.cpp" line="+96"/>
+        <location filename="../src/cgame.cpp" line="+94"/>
         <source>Ваше время: </source>
         <translation type="unfinished"></translation>
     </message>
@@ -142,7 +142,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+109"/>
+        <location filename="../src/cmainwindow.cpp" line="+104"/>
         <source>Внимание!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -313,7 +313,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/crecordsdialog.cpp" line="+78"/>
+        <location filename="../src/crecordsdialog.cpp" line="+86"/>
         <source>Дата</source>
         <translation type="unfinished"></translation>
     </message>
@@ -340,6 +340,21 @@
     <message>
         <location line="+0"/>
         <source>нет</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Внимание</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Вы действительно хотите очистить рекорды текушего типа </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/crecordsdialog.ui"/>
+        <source>Очистить таблицу рекордов</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

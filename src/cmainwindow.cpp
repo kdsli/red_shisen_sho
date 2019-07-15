@@ -37,16 +37,6 @@ CMainWindow::CMainWindow(QWidget *parent) :  QMainWindow(parent),
 
     slotTrainingChange();
 
-    createGame();
-}
-
-CMainWindow::~CMainWindow()
-{
-    delete ui;
-}
-
-void CMainWindow::createGame()
-{
     m_game = new CGame(this);
     setCentralWidget(m_game->board());
 
@@ -65,6 +55,11 @@ void CMainWindow::createGame()
     connect(m_game, &CGame::signalResetPauseAction, this, &CMainWindow::slotResetPauseAction);
     connect(m_game, &CGame::signalShowResult, this, &CMainWindow::slotShowResults);
     connect(m_game->board(), &CBoard::signalUndoRedo, this, &CMainWindow::slotUndoRedo);
+}
+
+CMainWindow::~CMainWindow()
+{
+    delete ui;
 }
 
 void CMainWindow::slotOptions()

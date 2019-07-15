@@ -4,7 +4,7 @@
 <context>
     <name>CGame</name>
     <message>
-        <location filename="../src/cgame.cpp" line="+96"/>
+        <location filename="../src/cgame.cpp" line="+94"/>
         <source>Ваше время: </source>
         <translation>Time&quot;: </translation>
     </message>
@@ -142,7 +142,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/cmainwindow.cpp" line="+109"/>
+        <location filename="../src/cmainwindow.cpp" line="+104"/>
         <source>Внимание!</source>
         <translation>Attention!</translation>
     </message>
@@ -313,7 +313,7 @@
         <translation>Table of records</translation>
     </message>
     <message>
-        <location filename="../src/crecordsdialog.cpp" line="+78"/>
+        <location filename="../src/crecordsdialog.cpp" line="+86"/>
         <source>Дата</source>
         <translation>Date</translation>
     </message>
@@ -341,6 +341,21 @@
         <location line="+0"/>
         <source>нет</source>
         <translation>no</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Внимание</source>
+        <translation>Attention</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Вы действительно хотите очистить рекорды текушего типа </source>
+        <translation>Are you sure you want to clear current type records </translation>
+    </message>
+    <message>
+        <location filename="../src/crecordsdialog.ui"/>
+        <source>Очистить таблицу рекордов</source>
+        <translation>Clear records table</translation>
     </message>
 </context>
 <context>

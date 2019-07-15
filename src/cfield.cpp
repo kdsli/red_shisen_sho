@@ -98,6 +98,9 @@ void CField::Connect(const TilePair &tiles)
 VariantStatus CField::getGameStatus()
 {
     if (m_remaining == 0) return vsVictory;
+    m_hint_tiles.first = Tile();
+    m_hint_tiles.second = Tile();
+    m_path.clear();
     if (!checkVariants(m_tiles, m_hint_tiles)) return vsNotVariant;
 
     // В пути будет лежать подсказка, а костяшки для подсказки - в m_hint_tiles

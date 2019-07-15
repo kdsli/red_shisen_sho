@@ -27,14 +27,13 @@ private:
     int m_result_index;
     int m_current_game_index;
 
-    QHBoxLayout *hlayout;
-
     void fillTabWidget();
-    void filltableWidget();
+    void fillTableWidget();
     void addTableItem(int row, int column, const QString &text);
 
 private slots:
     void slotTabChanged(int index);
+    void slotClear();
 
 };
 

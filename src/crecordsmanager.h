@@ -41,6 +41,9 @@ public:
     // Количество записей за каждый тип игры
     int maxRecord() const;
 
+    // Очистить записи текущей игры
+    void clear();
+
 private:
     GameRecords m_records;
     QString m_file_name;

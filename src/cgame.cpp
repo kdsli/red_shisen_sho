@@ -6,8 +6,6 @@
 
 #include <QApplication>
 
-#include <QDebug>
-
 CGame::CGame(QObject *parent) : QStateMachine(parent),
     m_board(nullptr),
     m_scene(nullptr),

@@ -26,8 +26,6 @@ private:
     COptionsDialog *m_options_dialog;
     CRecordsDialog *m_record_dialog;
 
-    void createGame();
-
 private slots:
     void slotOptions();
     void slotUpdateInfo();

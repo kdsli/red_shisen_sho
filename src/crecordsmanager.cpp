@@ -94,6 +94,12 @@ int CRecordsManager::maxRecord() const
     return max_record;
 }
 
+void CRecordsManager::clear()
+{
+    m_records[settings->currentGameType()].clear();
+    saveRecords();
+}
+
 // Прочитать из файла
 void CRecordsManager::loadRecords()
 {

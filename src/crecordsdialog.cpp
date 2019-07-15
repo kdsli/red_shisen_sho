@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QLocale>
 #include <QHeaderView>
+#include <QMessageBox>
 
 CRecordsDialog::CRecordsDialog(QWidget *parent) : QDialog(parent),
     ui(new Ui::CRecordsDialog),
@@ -31,15 +32,22 @@ CRecordsDialog::CRecordsDialog(QWidget *parent) : QDialog(parent),
     connect(m_tabbar, &QTabBar::currentChanged, this, &CRecordsDialog::slotTabChanged);
 
     // Layouts
-    hlayout = new QHBoxLayout;
-    hlayout->addWidget(m_tabbar);
-    hlayout->addWidget(m_table_widget);
-    hlayout->setStretch(1, 0);
+    auto layout_tab = new QHBoxLayout;
+    layout_tab->addWidget(m_tabbar);
+    layout_tab->addWidget(m_table_widget);
+    layout_tab->setStretch(1, 0);
 
-    auto vlayout = new QVBoxLayout;
-    vlayout->addLayout(hlayout);
-    vlayout->addWidget(ui->buttonBox);
-    setLayout(vlayout);
+    auto layout_button = new QHBoxLayout;
+    layout_button->addWidget(ui->buClear);
+    layout_button->addStretch();
+    layout_button->addWidget(ui->buttonBox);
+
+    auto main_layout = new QVBoxLayout;
+    main_layout->addLayout(layout_tab);
+    main_layout->addLayout(layout_button);
+    setLayout(main_layout);
+
+    connect(ui->buClear, &QPushButton::clicked, this, &CRecordsDialog::slotClear);
 }
 
 CRecordsDialog::~CRecordsDialog()
@@ -53,7 +61,7 @@ void CRecordsDialog::Show(int result_index)
     m_current_game_index = settings->currentGameIndex();
 
     m_tabbar->setCurrentIndex(m_current_game_index);
-    filltableWidget();
+    fillTableWidget();
 
     exec();
 }
@@ -69,9 +77,9 @@ void CRecordsDialog::fillTabWidget()
 }
 
 // Заполнить таблицу данными конкретной игры
-void CRecordsDialog::filltableWidget()
+void CRecordsDialog::fillTableWidget()
 {
-    auto records_list = records_manager->gameRecords(settings->games()[m_tabbar->currentIndex()].first);
+    auto &records_list = records_manager->gameRecords(settings->games()[m_tabbar->currentIndex()].first);
 
     m_table_widget->clear();
     m_table_widget->setRowCount(records_manager->maxRecord());
@@ -111,5 +119,17 @@ void CRecordsDialog::addTableItem(int row, int column, const QString &text)
 // Изменилась закладка
 void CRecordsDialog::slotTabChanged(int)
 {
-    filltableWidget();
+    fillTableWidget();
+}
+
+// Очистить
+void CRecordsDialog::slotClear()
+{
+    auto index = m_tabbar->currentIndex();
+    if (QMessageBox::question(this, tr("Внимание"), tr("Вы действительно хотите очистить рекорды текушего типа ")
+                              + settings->gamesName()[index] + "?",
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+        records_manager->clear();
+        fillTableWidget();
+    }
 }
