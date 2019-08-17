@@ -157,19 +157,14 @@ void CBoard::recalcView()
 // ------------------------------------------------------------------------------------------------
 void CBoard::clickLeftButton(QMouseEvent *event)
 {
-    switch (m_game_state) {
-    case gsGame:
+    if (m_game_state == gsGame) {
         m_scene->mouseLeft(mapToScene(event->pos()));
-        break;
-    case gsPause:
-    case gsDemostration:
-    case gsNotVariants:
-    case gsVictory:
-        emit signalClick();
-        break;
-    case gsEmpty:
-        break;
+        return;
     }
+    if (m_game_state == gsEmpty) return;
+    // В остальных случаях
+    emit signalClick();
+
 }
 
 // ------------------------------------------------------------------------------------------------
