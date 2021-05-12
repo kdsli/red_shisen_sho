@@ -2,7 +2,7 @@
 
 #include <QDir>
 #include <QMainWindow>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QApplication>
 
 static const QString GEOMETRY_GROUP = "Geometry";

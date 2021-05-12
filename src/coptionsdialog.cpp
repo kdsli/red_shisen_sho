@@ -6,7 +6,7 @@
 #include "ctilesmanager.h"
 
 #include <QDir>
-#include <QDesktopWidget>
+#include <QScreen>
 
 COptionsDialog::COptionsDialog(QWidget *parent) :
     QDialog(parent),

@@ -1,6 +1,7 @@
 #include "csettings.h"
 
 #include <QApplication>
+#include <QRegularExpression>
 #include <QDir>
 
 CSettings *settings;
@@ -78,15 +79,16 @@ const LanguagesList CSettings::listLanguages()
 void CSettings::initLanguagesList()
 {
     QDir dir(qApp->applicationDirPath() + QDir::separator() + settings->translationsDirName());
-    QRegExp re(translation_file_postfix + "(..)" + "\\.qm");
+    QRegularExpression re(translation_file_postfix + "(..)" + "\\.qm");
 
     m_languages.clear();
 
     QStringList filter{translation_file_postfix + "??.qm"};
     for (const auto &file : dir.entryList(filter, QDir::Files | QDir::Readable)) {
         // Выделим название языка
-        if (re.indexIn(file) == 0) {
-            auto lang = re.cap(1);
+        auto match = re.match(file);
+        if (match.hasMatch()) {
+            auto lang = match.captured(1);
             auto name = QLocale(lang).nativeLanguageName();
             if(!name.isEmpty()) name[0] = name[0].toUpper();
             m_languages.insert(lang, name);
