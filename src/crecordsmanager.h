@@ -1,4 +1,4 @@
-#ifndef CRECORSDMANAGER_H
+﻿#ifndef CRECORSDMANAGER_H
 #define CRECORSDMANAGER_H
 
 #include "csettings.h"

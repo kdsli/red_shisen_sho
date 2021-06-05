@@ -8,6 +8,8 @@
 #include <QDataStream>
 #include <QGraphicsSvgItem>
 
+#define isBase64 true
+
 CRecordsManager *records_manager = nullptr;
 
 // Максимальное количество хранимых рекордов
@@ -117,20 +119,24 @@ void CRecordsManager::loadRecords()
     ds >> ba;
 
     // Super decode!
+#if isBase64
     QByteArray dst = QByteArray::fromBase64(ba);
+#else
+    QByteArray dst = ba;
+#endif
 
     // А дальше разбираем уже поток из массива
     QDataStream buffer(&dst, QIODevice::ReadOnly);
     buffer.setVersion(QDataStream::Qt_5_0);
 
     // Читаем количество игр
-    int game_count;
+    qint64 game_count;
     buffer >> game_count;
 
     // И каждую игру
     for (int i = 0; i < game_count; ++i) {
         int game_key;
-        int record_count;
+        qint64 record_count;
         buffer >> game_key >> record_count;
         RecordList list;
         for (int j = 0; j < record_count; ++j) {
@@ -174,6 +180,10 @@ void CRecordsManager::saveRecords()
     }
 
     // А буфер в файл - super encoding!
+#if isBase64
     ds << ba.toBase64();
+#else
+    ds << ba;
+#endif
 }
 
